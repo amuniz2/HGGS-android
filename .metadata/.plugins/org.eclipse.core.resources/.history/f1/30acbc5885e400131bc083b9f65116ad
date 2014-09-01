@@ -1,0 +1,78 @@
+package com.amlm.honeygogroceryshopping.model.serialization;
+
+import java.io.IOException;
+import java.util.UUID;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.amlm.honeygogroceryshopping.interfaces.IGroceryItemSerializer;
+import com.amlm.honeygogroceryshopping.model.Category;
+import com.amlm.honeygogroceryshopping.model.GroceryItem;
+import com.google.inject.Singleton;
+
+
+@Singleton
+public class JSONGroceryItem implements IGroceryItemSerializer {
+    
+	public  GroceryItem parseFromJsonString(String text) throws JSONException 
+	{
+		
+   	 	JSONObject jsonItem = new JSONObject(text);
+   	 	return parseFromJson(jsonItem);
+
+	}
+	private static String getCategoryName(JSONObject jsonItem) throws JSONException
+	{
+		String catIdAsString = jsonItem.getString(JsonTags.TAG_CATEGORY_ID);
+		if ((catIdAsString != null) && (!catIdAsString.isEmpty()))
+			return Category.IdToName(UUID.fromString(catIdAsString));
+			
+		return jsonItem.getString(JsonTags.TAG_CATEGORY_NAME);	
+		
+	}
+	public static GroceryItem parseFromJson(JSONObject jsonItem) throws JSONException 
+	{
+
+			
+   	 		GroceryItem ret = new GroceryItem(
+   	 				jsonItem.getString(JsonTags.TAG_NAME),
+   	 				/*UUID.fromString(jsonItem.getString(JsonTags.TAG_ID)),*/
+   	 				jsonItem.getInt(JsonTags.TAG_QUANTITY),
+   	 				jsonItem.getString(JsonTags.TAG_UNIT), 			
+   	 				getCategoryName(jsonItem),
+   	 		jsonItem.getBoolean(JsonTags.TAG_SELECTED),
+   	 		jsonItem.getString(JsonTags.TAG_NOTES));  	 				
+   	 		
+   	        
+   	 	return ret;
+
+	}
+	public  String writeToJsonString(GroceryItem item) throws JSONException, IOException
+	{
+	
+        JSONObject jsonItem = writeToJson(item);
+        return jsonItem.toString();
+        
+        
+	}
+	public static  JSONObject writeToJson(GroceryItem item) throws JSONException, IOException
+	{
+	
+        	JSONObject jsonItem = new JSONObject();
+        	jsonItem.put(JsonTags.TAG_NAME, item.getName());
+        	jsonItem.put(JsonTags.TAG_SELECTED, item.getSelected());
+        	//jsonItem.put(JsonTags.TAG_ID, item.getId().toString());	            	
+        	//jsonItem.put(JsonTags.TAG_CATEGORY_ID, item.getCategoryId().toString());	        
+        	jsonItem.put(JsonTags.TAG_CATEGORY_NAME, item.getCategoryName());	        
+        	jsonItem.put(JsonTags.TAG_NOTES, item.getNotes());
+        	jsonItem.put(JsonTags.TAG_LAST_PURCHASED_DATE, item.getLastPurchasedDate().toString());
+        	jsonItem.put(JsonTags.TAG_QUANTITY, item.getQuantity());
+        	jsonItem.put(JsonTags.TAG_UNIT, item.getUnitsOrSize());
+        	
+        
+        return jsonItem;
+        
+        
+	}
+}

@@ -1,0 +1,10 @@
+1358740963371	Copy file
+1358904450271	Rename method 'saveGroceryItems'
+1358917213914	Rename method 'findFirstViewsWithText'
+1358944281682	Encapsulate field 'errorMessage'
+1358944297876	Rename field 'errorMessage'
+1358944523036	Encapsulate field 'errorMessage'
+1358992041875	Infer generic type arguments
+1358992329133	Copy compilation unit
+1358992352831	Rename type 'GroceryFile'
+1358994106469	Rename type 'DataAccessorModule'

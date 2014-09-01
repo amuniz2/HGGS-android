@@ -1,0 +1,21 @@
+package com.amlm.grocerylistapp.interfaces;
+
+public class ConfirmDeleteReturn {
+
+	    DialogReturn dialogReturn;
+
+	    public interface DialogReturn {
+
+	        void onDeleteConfirmed(boolean answer);
+	    }
+
+	    public void setListener(DialogReturn dialogReturn) {
+	        this.dialogReturn = dialogReturn;
+	    }
+
+	    public DialogReturn getListener() {
+	        return dialogReturn;
+
+	    }
+	
+}

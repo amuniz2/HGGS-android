@@ -1,0 +1,181 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.amlm.honeygogroceryshopping.dataaccess;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+
+import org.json.JSONException;
+
+import android.content.Context;
+
+import com.amlm.honeygogroceryshopping.FileNameConstants;
+import com.amlm.honeygogroceryshopping.activities.R;
+import com.amlm.honeygogroceryshopping.model.*;
+
+import com.amlm.honeygogroceryshopping.model.serialization.*;
+import com.google.inject.Inject;
+
+
+/**
+ *
+ * @author Owner
+ */
+// todo make this an async task???
+public class DataAccessor implements IDataAccessor {
+
+     
+    @Inject
+    public DataAccessor()
+    {
+    	
+    }
+    public DataAccessor(Context context)
+    { 
+      setContext(context);
+      
+      }
+    
+    
+    public ArrayList<GroceryItem> loadGroceryItems( GroceryFile file) throws IOException  
+    {
+       ArrayList<GroceryItem> ret = null;
+       
+       ret=loadList(file);
+       ret.trimToSize();     
+       Collections.sort(ret);
+  
+       return ret;
+        
+    }
+    public void saveCategories(ArrayList<Category> cats) throws  IOException, JSONException
+    //public void saveCategories(String fileName, ArrayList<Category> cats) throws  IOException, JSONException
+    {
+    	cats.trimToSize();
+    	// if ends with "json"
+    		this.saveCatsAsJson(cats,GroceryFile.JsonFiles.get(FileNameConstants.CategoryListFileName));
+        
+
+    }
+ 
+    public ArrayList<Category> loadCategories( ) throws IOException  
+    {
+       ArrayList<Category> ret = null;
+       
+       ret=this.loadCats();
+       ret.trimToSize();
+       Collections.sort(ret);
+       DataCache.setCategories(ret);
+       return ret;
+        
+    }
+
+    
+    public void delete(GroceryFile file)
+    {
+    	file.delete(getContext());
+    }
+    public void saveGroceryItems(GroceryFile file, ArrayList<GroceryItem> items) throws  IOException, JSONException
+    {
+    	items.trimToSize();
+    	// if ends with 'json'
+    	this.saveListAsJson(items, file);
+    	//saveList(items, fileName);
+    }
+   
+   
+    
+    private void saveCatsAsJson(ArrayList<Category> cats, GroceryFile file) throws FileNotFoundException, IOException, JSONException
+    {
+    	file.save(getContext(), JsonCategoryList.writeList(cats));
+        DataCache.setCategories(cats) ;
+    }
+    private void saveListAsJson(ArrayList<GroceryItem> items, GroceryFile gfile) throws FileNotFoundException, IOException, JSONException
+    {
+           gfile.save(getContext(), JsonItemList.writeList(items));
+       
+    }
+   
+   
+    private ArrayList<GroceryItem> loadList(GroceryFile gfile) throws IOException 
+    {
+    	ArrayList<GroceryItem> groceryItems = null;
+     
+         try
+        {
+         	 String fileContents = gfile.read(this.getContext());
+         	groceryItems = JsonItemList.parseList(fileContents);  
+       
+        }
+         catch(Exception exception )
+         {
+             groceryItems = new ArrayList<GroceryItem>();
+         }
+      
+
+         
+     // this.setGroceryList(groceryItems);
+      return groceryItems;
+
+     
+    }
+    private ArrayList<Category> loadCats() throws IOException 
+    {
+    	ArrayList<Category> cats = null;
+       
+        
+         try
+        {
+        	 String fileContents = GroceryFile.JsonFiles.get(FileNameConstants.CategoryListFileName).read(this.getContext());
+         	cats = JsonCategoryList.parseList(fileContents);  
+         	 
+        }
+         catch(Exception exception )
+         {
+        	 Category defaultCat = new Category();
+             cats = new ArrayList<Category>();
+             defaultCat.setId(GroceryItem.DEFAULT_CATEGORY_ID);
+             defaultCat.setName(this.getContext().getResources().getString(R.string.default_category_name));
+             //defaultCat.setOrder(0);
+             cats.add(defaultCat);
+         }
+      
+
+        return cats;
+
+     
+    }
+   
+	private Context _context;
+    
+	public Context getContext() {
+		return _context;
+	}
+	public void setContext(Context context) {
+		this._context = context;
+	}
+	@Override
+	public void storeKeys(DropboxInfo dbInfo) throws IOException, JSONException {
+	    GroceryFile gFile = GroceryFile.JsonFiles.get(FileNameConstants.DBKeysFile);
+	    gFile.save(getContext(), JsonDropboxKeys.writeJsonString(dbInfo));	
+	}
+	@Override
+	public DropboxInfo loadKeys() throws IOException {
+		// TODO Auto-generated method stub
+	    GroceryFile gFile = GroceryFile.JsonFiles.get(FileNameConstants.DBKeysFile);
+		DropboxInfo keys = null;
+		try
+		{
+			String fileContents = gFile.read(getContext());
+			keys = JsonDropboxKeys.parseFromJsonString(fileContents);
+			
+		}
+		catch (Exception e)
+		{}
+		return keys;
+	}
+}

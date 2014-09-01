@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" 
+        android:text="@string/label_prompt_for_sharing_direction"/>
+
+	<RadioGroup 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"    
+	    android:id="@+id/enable_dropbox_options"
+	    >
+    <RadioButton
+        android:id="@+id/download_dropbox_files"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/use_dropbox_files" />
+
+    <RadioButton
+        android:id="@+id/upload_dropbox_files"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/share_grocery_files" />
+
+    <RadioButton
+        android:id="@+id/unlink_from_dropbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/cancel_sharing" />
+    </RadioGroup>
+ 		<Button
+ 		    android:id="@+id/btnProceed"
+ 		    android:onClick="onProceed"
+ 		    android:layout_width ="match_parent"
+ 		    android:layout_height="wrap_content"
+ 		    android:text="@string/proceed" />
+        
+
+</LinearLayout>

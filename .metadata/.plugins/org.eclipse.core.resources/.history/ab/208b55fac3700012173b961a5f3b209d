@@ -1,0 +1,71 @@
+package com.amlm.honeygogroceryshopping.model.serialization;
+
+import java.io.IOException;
+import java.util.UUID;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.amlm.honeygogroceryshopping.model.GroceryItem;
+
+public class JSONGroceryItem {
+	private static final String  TAG_NAME= "name";
+    private static final String  TAG_NOTES= "notes";
+    private static final String  TAG_SELECTED= "selected";
+    private static final String  TAG_LAST_PURCHASED_DATE= "lastPurchasedDate";
+    private static final String  TAG_QUANTITY = "quantity";
+    private static final String  TAG_UNIT = "unit";
+    private static final String TAG_CATEGORY_ID = "category";
+    private static final String TAG_ID = "id";
+    
+	public static GroceryItem parseFromJsonString(String text) throws JSONException 
+	{
+		
+   	 	JSONObject jsonItem = new JSONObject(text);
+   	 	return JSONGroceryItem.parseFromJson(jsonItem);
+
+	}
+	public static GroceryItem parseFromJson(JSONObject jsonItem) throws JSONException 
+	{
+	
+   	 		GroceryItem ret = new GroceryItem(
+   	 				jsonItem.getString(TAG_NAME),
+   	 				UUID.fromString(jsonItem.getString(TAG_ID)),
+   	 				jsonItem.getInt(TAG_QUANTITY),
+   	 				jsonItem.getString(TAG_UNIT), 			
+   	 			UUID.fromString(jsonItem.getString(TAG_CATEGORY_ID)),
+   	 		jsonItem.getBoolean(TAG_SELECTED),
+   	 		jsonItem.getString(TAG_NOTES));  	 				
+   	 		
+   	        
+   	 	return ret;
+
+	}
+	public static String writeToJsonString(GroceryItem item) throws JSONException, IOException
+	{
+	
+        JSONObject jsonItem = JSONGroceryItem.writeToJson(item);
+        return jsonItem.toString();
+        
+        
+	}
+	public static JSONObject writeToJson(GroceryItem item) throws JSONException, IOException
+	{
+	
+        	JSONObject jsonItem = new JSONObject();
+        	jsonItem.put(TAG_NAME, item.getName());
+        	jsonItem.put(TAG_SELECTED, item.getSelected());
+        	jsonItem.put(TAG_ID, item.getId().toString());	            	
+        	jsonItem.put(TAG_CATEGORY_ID, item.getCategoryId().toString());	        
+        	
+        	jsonItem.put(TAG_NOTES, item.getNotes());
+        	jsonItem.put(TAG_LAST_PURCHASED_DATE, item.getLastPurchasedDate().toString());
+        	jsonItem.put(TAG_QUANTITY, item.getQuantity());
+        	jsonItem.put(TAG_UNIT, item.getUnitsOrSize());
+        	
+        
+        return jsonItem;
+        
+        
+	}
+}

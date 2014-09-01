@@ -1,0 +1,100 @@
+package com.amlm.saviorapp;
+
+import java.util.Calendar;
+import java.util.Date;
+
+import com.google.inject.Key;
+import roboguice.activity.RoboActivity;
+import roboguice.inject.InjectView;
+
+import com.amlm.saviorapp.R;
+
+import android.app.Activity;
+import android.app.Application;
+import android.content.Context;
+import android.media.AudioManager;
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.Menu;
+import android.view.View;
+import android.widget.TextView;
+import android.widget.TimePicker;
+
+public class MainActivity extends RoboActivity {
+	@InjectView(R.id.tvAudioMode) TextView _tvAudioMode; 
+	@InjectView(R.id.revertTimePicker) TimePicker _revertTimePicker;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
+	}
+
+	// list for broadcast intent: RINGER_MODE_CHANGED_ACTION
+	private String getCurrentAudioSetting()
+	{
+		AudioManager audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
+		int ringerMode = audioManager.getRingerMode();
+		if (ringerMode == AudioManager.RINGER_MODE_NORMAL)
+			return "Normal";
+		
+		if (ringerMode == AudioManager.RINGER_MODE_VIBRATE)
+			return "Vibrate";
+		
+		if (ringerMode == AudioManager.RINGER_MODE_SILENT)
+			return "Silent";
+		
+		return "Unknown";
+	}
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.activity_main, menu);
+		return true;
+	}
+	  @Override
+	    public void onStart()
+	    {
+	    	super.onStart();
+	    	
+	    	this.bind();
+	    	
+	    }
+	  
+	  private void bind()
+	  {
+		  String currentAudioSetting = this.getCurrentAudioSetting() ;
+		  _tvAudioMode.setText(currentAudioSetting);
+	  }
+	  public void setTimer(View v)
+	  {
+		  Calendar calendar = Calendar.getInstance(); // gets the current date/time
+
+		  calendar.set(Calendar.HOUR_OF_DAY, _revertTimePicker.getCurrentHour());
+		  calendar.set(Calendar.MINUTE, _revertTimePicker.getCurrentMinute());
+		 
+		  scheduleChange(calendar, AudioManager.RINGER_MODE_NORMAL);
+		  
+		//  this.finish();
+	  }
+	  private void scheduleChange(Calendar dateTimeToRevert, int modeToRevertTo)
+	  {
+		  final Handler handler = new Handler();	  
+		  final int mode = modeToRevertTo;
+		  final long period = dateTimeToRevert.getTimeInMillis() - Calendar.getInstance().getTimeInMillis();
+		  long minutes = period/60000;
+		  new Runnable() {
+		      public void run() {
+		    	  
+		          //Toast.makeText(getApplicationContext(),"RUN!",Toast.LENGTH_SHORT).show();
+		    	  
+		    	  AudioManager audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+		    	  audioManager.setRingerMode(mode);
+		    	  handler.postDelayed(this, period);
+		      }
+		      };
+		  
+		  };
+
+	  }
+	  

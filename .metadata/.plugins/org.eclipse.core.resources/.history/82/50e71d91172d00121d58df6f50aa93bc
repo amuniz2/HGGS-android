@@ -1,0 +1,18 @@
+package com.amlm.grocerylistapp.adapters;
+
+
+import com.amlm.grocerylistapp.model.GroceryItem;
+
+import android.content.Context;
+import android.widget.ArrayAdapter;
+
+public class GroceryListAdapter extends ArrayAdapter<GroceryItem> {
+//	private final Context _context;
+//	  private final GroceryItem[] _values;
+
+	public GroceryListAdapter(Context context, GroceryItem[] values) {
+	    super(context, /*R.layout.rowlayout,*/ values.length);
+	//    this._context = context;
+	 //   this._values = values;
+	  }
+}

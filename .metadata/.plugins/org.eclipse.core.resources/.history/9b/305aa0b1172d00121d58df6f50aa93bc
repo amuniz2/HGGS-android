@@ -1,0 +1,165 @@
+package com.amlm.grocerylistapp.adapters;
+
+
+import java.util.List;
+
+import com.amlm.grocerylistapp.activities.MainActivity;
+import com.amlm.grocerylistapp.activities.R;
+import com.amlm.grocerylistapp.adapters.CategoryListAdapter.CategoriesViewHolder;
+import com.amlm.grocerylistapp.model.Category;
+import com.amlm.grocerylistapp.model.GroceryItem;
+
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+
+public class GroceryListAdapter extends ArrayAdapter<GroceryItem> 
+{
+	
+	public GroceryListAdapter(Context context, int resource,
+			int textViewResourceId, List<GroceryItem> objects) {
+		super(context, resource, textViewResourceId, objects);
+	}
+	//private LayoutInflater _inflater;
+	    private static final int VIEW_ITEM_NORMAL = 0;
+	    private static final int VIEW_ITEM_SELECTED = 1;	
+        private Category _catSelected= null;
+	    @Override
+	    public int getItemViewType(int position) {
+	        return getSelected(position) ? VIEW_ITEM_SELECTED : VIEW_ITEM_NORMAL;
+	        // implement isSelected()
+	    }
+	    @Override
+	    public int getViewTypeCount() {
+	        return 2;
+	    }	    
+	    
+	  
+	    
+	    public boolean getSelected(int position)
+	    {
+	    	boolean ret = false;
+	    	if (getCategorySelected() != null)
+	    	{
+	    		ret=getCategorySelected().equals(getItem(position));
+	    	}
+	    	return ret;
+	    }
+	    public void setSelected(int position)
+	    {
+	    	if (position == NO_SELECTION)
+	    		setCategorySelected(null);
+	    	else
+	    		setCategorySelected((Category)getItem(position));
+	    	
+	    }
+	    @Override
+	    public View getView(int position, View convertView, ViewGroup parent) {
+	        CategoriesViewHolder viewHolder = null;
+	        View v = null;
+
+	        int layoutId;
+	        int viewType = getItemViewType(position);
+	        if (convertView != null)
+	        {
+	        	viewHolder = (CategoriesViewHolder)convertView.getTag();
+	        	v = convertView;	
+	        }
+	        else 
+	        {	             
+	        	LayoutInflater li = (LayoutInflater) getContext().getSystemService(
+	                     Context.LAYOUT_INFLATER_SERVICE);
+
+	        	if (viewType == VIEW_ITEM_NORMAL)
+	            {
+	                layoutId = R.layout.category_item;
+		        }
+	            else
+	            {
+	            	layoutId = R.layout.selected_category_item;
+	            	
+	            }
+	            try
+	            {
+	            	v = li.inflate(layoutId, parent,false);
+	            	viewHolder = new CategoriesViewHolder(v, viewType);        
+	            	v.setTag(viewHolder);
+	            }
+	            catch (Exception ex)
+	            {
+	            	MainActivity.reportError(ex, getContext());
+	            	
+	            }
+	            
+	        } 
+	        Category cat = getItem(position);
+	        viewHolder.bindTo(cat);
+	        
+	        return v;
+	    }
+	    
+	
+	    public Category getCategorySelected() {
+			return _catSelected;
+		}
+		public void setCategorySelected(Category catSelected) {
+			this._catSelected = catSelected;
+		}
+
+
+		static class CategoriesViewHolder {
+	    	View _v;
+	    	int _viewType;
+	    	Category _cat;
+        	EditText editName;
+        	EditText editOrder;
+        	//TextView txOrderLabel;
+        	TextView txOrder;
+        	Button doneButton;
+        	Button deleteButton;
+        	TextView txName;
+        	
+	    	CategoriesViewHolder(View v, int viewType)
+	    	{
+	    		_v = v;
+	    		_viewType=viewType;
+	    		if (viewType == VIEW_ITEM_NORMAL)
+	    		{
+	        	    txName=(TextView)v.findViewById(R.id.cat_name)	;
+	    			txOrder=(TextView)v.findViewById(R.id.cat_aisle);
+	    		}
+	    		else
+	    		{
+	        	    editName=(EditText)v.findViewById(R.id.edit_cat_name)	;
+	        	    editOrder=(EditText)v.findViewById(R.id.edit_aisle);
+	    			doneButton=(Button)v.findViewById(R.id.doneButton);
+	    			deleteButton=(Button)v.findViewById(R.id.delButton);
+	    		}
+	    	}
+	        public void bindTo(Category cat)
+	        {
+	        	//if (_cat != cat)
+	        	//	{
+	        			_cat=cat;
+	        			if (_viewType == VIEW_ITEM_NORMAL)
+	        			{
+	        				txName.setText( cat.getName());
+	        				txOrder.setText(cat.getOrder().toString());
+	        			}
+	        			else
+	        			{
+	        				editName.setText( cat.getName());	    			
+	        				editOrder.setText(cat.getOrder().toString());
+	        					        		
+	        				doneButton.setTag(cat);
+	        				deleteButton.setTag(cat);
+	        			}
+	        	//	}
+	        }
+	    }	
+}

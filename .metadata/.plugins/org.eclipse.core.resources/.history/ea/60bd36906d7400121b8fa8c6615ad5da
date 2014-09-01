@@ -1,0 +1,94 @@
+package com.amlm.honeygogroceryshopping.tests.mocks.serializers;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.UUID;
+//import org.json.JSONException;
+//import net.sf.json.JSONArray;
+//import net.sf.json.*;
+//import net.sf.json.JSONObject;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
+
+import com.amlm.honeygogroceryshopping.interfaces.IItemListSerializer;
+import com.amlm.honeygogroceryshopping.model.Category;
+import com.amlm.honeygogroceryshopping.model.GroceryItem;
+import com.amlm.honeygogroceryshopping.model.serialization.JsonTags;
+
+public class MockItemListSerializer implements IItemListSerializer  {
+    
+	public MockItemListSerializer() {}
+	
+	public  ArrayList<GroceryItem> parseList(String text) throws org.json.JSONException 
+	{
+		JSONParser parser = new JSONParser();
+		ArrayList<GroceryItem> items = new ArrayList<GroceryItem>();
+		try
+		{
+			
+			//JSONArray jsonCats = JSONArray.fromObject(text);
+			JSONArray jsonItems =  (JSONArray) parser.parse(text);
+			//int len = jsonCats.length();
+   	 		GroceryItem currentItem = null;
+   	 		JSONObject jsonCat = null;
+   	 		
+   	 		//for (int i = 0; i < len ; i++)
+   	 		for (Object obj : jsonItems)
+   	 		{
+   	 		
+	   	 		//jsonCat= jsonCats.getJSONObject(i);
+	   	 		jsonCat = (JSONObject) obj;
+	   	 		currentItem = new GroceryItem();
+	   	 		
+	   	 		//currentCategory.setName(jsonCat.getString(JsonTags.TAG_NAME));
+	   	 	currentItem.setName((String)jsonCat.get(JsonTags.TAG_NAME));
+	   	 		//currentCategory.setOrder(jsonCat.getInt(JsonTags.TAG_ORDER));
+	   	 		
+	   	 		currentItem.setOrder(Integer.valueOf( (String)jsonCat.get(JsonTags.TAG_ORDER) ));
+	   	 		currentItem.setId(UUID.fromString((String)jsonCat.get(JsonTags.TAG_ID)));
+	   	        items.add(currentItem);
+	   	 	}
+		
+			}
+		catch (Exception ex)
+		{
+			throw new org.json.JSONException(ex.getMessage());
+		}
+
+			return items;
+
+	}
+	public  String writeList(Collection<GroceryItem> list) throws org.json.JSONException, IOException
+	{
+		JSONArray jsonCatList = new JSONArray();
+		try
+		{
+			JSONObject jsonCatAttributes =null;
+		
+	        String name;
+	        for (GroceryItem item: list){
+	        	name = item.getName();
+	        	if ((name != null) && !name.isEmpty())
+	        	{
+	        		jsonCatAttributes = new  JSONObject();
+	        		
+	        		jsonCatAttributes.put(JsonTags.TAG_NAME, name);
+	        		jsonCatAttributes.put(JsonTags.TAG_ORDER, String.valueOf(item.getOrder()));
+	        		jsonCatAttributes.put(JsonTags.TAG_ID, item.getId().toString());	            	
+	        		jsonCatList.add(jsonCatAttributes);
+	        	}
+	        }
+		}
+		catch (Exception ex)
+		{
+			throw new org.json.JSONException(ex.getMessage());
+		}
+		return jsonCatList.toString();
+        
+        
+	}
+		
+}

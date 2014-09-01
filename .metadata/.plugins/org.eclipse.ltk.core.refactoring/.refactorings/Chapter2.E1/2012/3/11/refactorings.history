@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;Chapter2.E1/src/SuperCalc&apos; to &apos;SuperCalc.java&apos;" description="Rename resource &apos;SuperCalc&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="src/SuperCalc" name="SuperCalc.java" stamp="1331517354374" updateReferences="true"/>
+</session>

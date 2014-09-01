@@ -1,0 +1,24 @@
+package modules;
+
+import mocks.groceryfile.EmptyGroceryFileMock;
+
+import com.amlm.honeygogroceryshopping.interfaces.IGroceryFile;
+import com.google.inject.AbstractModule;
+
+
+	public class EmptyGroceryFileModule extends AbstractModule  {
+
+//		static public IDataAccessor getDataAccessor(Context context)
+//		{
+//			return new DataAccessor(context);
+//		}
+
+		
+		@Override
+		protected void configure() {
+			// TODO Auto-generated method stub
+			bind(IGroceryFile.class).to(EmptyGroceryFileMock.class);
+			//	bind(Context.class).to(Context.class);
+		}
+	}	
+

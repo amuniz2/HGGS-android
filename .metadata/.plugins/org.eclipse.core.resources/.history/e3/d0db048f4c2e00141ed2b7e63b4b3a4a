@@ -1,0 +1,466 @@
+package com.amlm.honeygogroceryshopping.activities;
+
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+
+import org.json.JSONException;
+import org.ksoap2.SoapFault;
+import org.ksoap2.serialization.SoapPrimitive;
+import org.ksoap2.serialization.SoapSerializationEnvelope;
+import org.ksoap2.transport.HttpTransportSE;
+import org.xmlpull.v1.XmlPullParserException;
+
+import roboguice.inject.InjectView;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.Spinner;
+
+import com.amlm.honeygogroceryshopping.dataaccess.DataCache;
+import com.amlm.honeygogroceryshopping.interfaces.ConfirmReturn;
+import com.amlm.honeygogroceryshopping.model.Category;
+import com.amlm.honeygogroceryshopping.model.GroceryItem;
+import com.amlm.honeygogroceryshopping.webserviceconsumers.JsonProductList;
+import com.amlm.honeygogroceryshopping.webserviceconsumers.Product;
+import com.amlm.honeygogroceryshopping.webserviceconsumers.SoapReuest;
+import com.amlm.honeygogroceryshopping.zxing.IntentIntegrator;
+import com.amlm.honeygogroceryshopping.zxing.IntentResult;
+
+
+
+public abstract class BaseEditItemActivity extends BaseActivity implements ConfirmReturn.DialogReturn {
+	@InjectView(R.id.edit_name) EditText _etName; 
+    @InjectView(R.id.edit_notes) EditText _etNotes;
+	@InjectView(R.id.edit_quantity) EditText _etQuantity;
+	@InjectView(R.id.edit_unitOrSize) EditText _etUnits;
+    @InjectView(R.id.location_spinner) Spinner _spinnerGroceryType;
+
+    // constants
+	public static final int ACTIVITY_SELECT_FROM = 1;
+	public static final int RESULT_DELETE = RESULT_FIRST_USER;
+	public static final String EXTRA_ITEM = "com.amlm.honeygoshopping.ITEM";
+    
+	// private members
+	private GroceryItem _item;
+    private ArrayAdapter<Category> _locationAdapter; 
+	private ArrayList<Category>_possibleLocations ;
+	private ConfirmReturn<GroceryItem> _confirmDeleteDialog;	
+	
+	// field accessors
+	public GroceryItem getItem() { return _item; }
+	public void setItem(GroceryItem item) { _item = item;}
+	
+
+	// abstract methods
+    public abstract String getTag();	
+	
+    // overrides
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        
+        Intent intent = getIntent();
+        GroceryItem item = (GroceryItem) intent.getSerializableExtra(BaseEditItemActivity.EXTRA_ITEM);
+        this.setItem(item );    
+       
+        _confirmDeleteDialog = new ConfirmReturn<GroceryItem>();
+        _confirmDeleteDialog.setListener(this);
+    } 
+
+	
+    @Override
+    public void onStart()
+    {
+    	super.onStart();
+    	
+    	this.bind();
+    	
+    }
+   
+    @Override
+    public void onConfirmed(boolean answer) {
+            if(answer)
+            {
+            	this.setResult(RESULT_DELETE,this.getIntent());
+            	this.finish();
+            	
+            }   
+     }  
+ 
+    // common functionality
+    public void cancelEdit(View view)
+    {
+    	this.setResult(RESULT_CANCELED);
+    	this.finish();
+    }
+    public void applyEdit(View view)
+    {
+    	String name = _etName.getText().toString();
+    	
+    	if ((name != null) && (!name.isEmpty()))
+    	{
+    		saveValues();
+    		this.setResult(RESULT_OK, this.getIntent());
+    		this.finish();
+    	
+    	}
+    	else
+    	{
+    		super.messageBox("Missing Name", "Please provide a name for the grocery item", this);
+    	}
+    }    
+  
+    public void deleteItem(View view)
+    {
+    	confirmDeletionOfItem();
+    }
+    public void confirmDeletionOfItem()
+    {
+    	AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(this);
+    	
+    	dlgAlert.setMessage(R.string.confirm_delete_item);
+		dlgAlert.setTitle(R.string.confirm);
+		dlgAlert.setPositiveButton(R.string.yes,
+			    new DialogInterface.OnClickListener() {
+			        public void onClick(DialogInterface dialog, int which) {
+			        	_confirmDeleteDialog.getListener().onConfirmed(true); 
+			        }
+			    });    	
+		dlgAlert.setNegativeButton(R.string.no, 
+			    new DialogInterface.OnClickListener() {
+	        public void onClick(DialogInterface dialog, int which) {
+	        	_confirmDeleteDialog.getListener().onConfirmed(false); 
+	        }
+	        });
+		dlgAlert.setCancelable(true);
+		dlgAlert.create();
+		dlgAlert.show();			    	
+    
+    }
+     
+  
+     public void setupLocationAdapter(int spinnerId)
+     {
+    	 Spinner locationSpinner = (Spinner) this.findViewById(spinnerId);
+       	ArrayList<Category> locations = getLocationsToChooseFrom();
+        
+        	// First paramenter - Context
+      	// Second parameter - Layout for the row
+      	// Third parameter - ID of the TextView to which the data is written
+      	// Forth - the Array of data
+      	ArrayAdapter<Category> adapter = new ArrayAdapter<Category>(this,
+      			R.layout.spinner_layout, // R.layout.list_item_text_view , //R.layout.spinner_layout, //android.R.layout.simple_spinner_item,
+      			 locations);
+        	adapter.setNotifyOnChange(false);
+    	adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+           		
+          	locationSpinner.setAdapter(adapter);     	 
+        	this.setLocationAdapter(adapter);
+        	this.setPossibleLocations(locations);
+     
+     }
+	
+	private ArrayList<Category> getLocationsToChooseFrom() {
+    	return DataCache.getCategories();
+		//return this.getDM().loadCategories();
+
+	}
+	public ArrayAdapter<Category> getLocationAdapter() {
+		return _locationAdapter;
+	}
+	public void setLocationAdapter(ArrayAdapter<Category> locationAdapter) {
+		this._locationAdapter = locationAdapter;
+	}
+	public ArrayList<Category> getPossibleLocations() {
+		return _possibleLocations;
+	}
+	public void setPossibleLocations(ArrayList<Category> possibleLocations) {
+		possibleLocations.trimToSize();
+		this._possibleLocations = possibleLocations;
+	}
+	protected Double textInputToDouble(EditText et)
+	{
+    	String str = et.getText().toString();
+    	return (str.isEmpty() ? 0 : Double.parseDouble(str)); 
+	}
+	private String formatQuantity(double quantity)
+	{
+		return new DecimalFormat((quantity % 1) == 0 ? "0" : "0.###").format(quantity); 
+	}
+    protected void bind()
+    {
+    	GroceryItem item = getItem();
+    	Category cat = null;
+    	if (item != null)
+    	{
+    		_etName.setText(item.getName());
+    		_etNotes.setText(item.getNotes());
+    		
+    		NumberFormat format = new DecimalFormat("0.###");
+    		
+    		_etQuantity.setText(/*String.valueOf(item.getuantity())*/ formatQuantity(item.getQuantity()));
+    		_etUnits.setText(item.getUnitsOrSize());
+    		
+    		cat =item.getCategory();
+    		 
+    		if (cat != null)
+    		{
+    			int position = this.getLocationAdapter().getPosition(cat);   			
+    			_spinnerGroceryType.setSelection(position);
+    		}
+
+    	
+    	}
+    }
+     
+    protected void saveValues()
+    {
+    	GroceryItem item = getItem();
+
+    	
+	 	item.setName(_etName.getText().toString());
+		item.setNotes(_etNotes.getText().toString());
+		item.setuantity(textInputToDouble(_etuantity));
+		item.setUnitsOrSize(_etUnits.getText().toString());	
+		item.setCategoryName(((Category)(this._spinnerGroceryType.getSelectedItem())).getName());
+
+    }
+    public void scanItem(View view) 
+    {
+    
+    	IntentIntegrator integrator = new IntentIntegrator(this);
+    	integrator.initiateScan();
+    	
+    	
+    }
+    @Override
+    public void onActivityResult(int reuestCode, int resultCode, Intent intent) 
+    {  
+    	// todo: needs to change to determine if htis is getting result of scan
+    	// or result of product selection
+    	switch (reuestCode)
+    	{
+    	case 1:
+    		// select product
+    		{
+    			setProductName( intent.getStringExtra(SelectProductActivity.PRODUCT_SELECTED));
+    			
+    		}
+    		break;
+    	default:
+    		// scan
+    		{
+    			IntentResult scanResult = IntentIntegrator.parseActivityResult(reuestCode, resultCode, intent);  
+    			if (scanResult != null) 
+    			{ 
+    				getItemDescription(scanResult.getContents());
+    			}  
+    		
+    		}
+    		break;
+    	}
+   
+    	// else continue with any other code you need in the method  ...}
+    }
+    private void getItemDescription(String productBarCode)
+    {
+    	
+    	if ((productBarCode != null) && (!productBarCode.isEmpty()))
+    	{
+    	    	try {
+	    		
+	    		BarCodeLookup lookup= new BarCodeLookup();
+	    		lookup.execute(productBarCode);
+    		}
+	    	catch (Throwable e) 
+	    	{
+	    		handleException("BarCodeLookup", e);
+	    	} 
+    	}
+    	
+    	
+    }
+    private void processGetProductResult(String errorMessage, String jsonResponse)
+    {
+       	Product product = null;
+       	if (errorMessage != null)
+       	{
+       		displayMessage("Error getting product info", errorMessage);	
+       	}
+       			
+       	else if ((jsonResponse != null) && !jsonResponse.isEmpty())
+		{
+			ArrayList<Product> matchingProducts;
+			try {
+				matchingProducts = JsonProductList.getProducts(jsonResponse);
+				if (matchingProducts.size() > 0)
+				{
+					product = getSingleProduct(matchingProducts);
+					if (product != null)
+					{
+			    			setProductName(product.getName());
+			    	}
+				   	// else let the user must select the correct
+					// OnActivityREsult() will handle when they have done so
+					
+				}
+				else
+				{
+					displayMessage("Product Information", "Product information is not available.");
+				}
+			} catch (JSONException e) {
+				
+				handleException(getTag(), e);
+			}
+			}
+
+    }
+    private void setProductName(String productName)
+    {
+		if ((productName != null) && (!productName.isEmpty()))
+		{
+			String currentName = this._etName.getText().toString();
+			GroceryItem item = getItem();
+			EditText et;
+		
+			if (currentName.isEmpty())
+			{
+				et = _etName;
+				item.setName(productName);
+			}
+			else
+			{
+				et = _etNotes;
+				item.setNotes(productName);
+			}
+			et.setText(productName);
+		}
+    }
+    private Product getSingleProduct(ArrayList<Product> products)
+    {
+    	Product ret = null;
+    	
+    	if (products.size() == 1)
+    	{
+    		ret = products.get(0);
+    	}
+    	else
+    	{
+          	Intent intent = new Intent(this, SelectProductActivity.class);
+        	//Intent intent = new Intent(this, EditCurrentListActivity.class);
+           	intent.putStringArrayListExtra(SelectProductActivity.PRODUCTS, getProductNames(products));
+           	startActivityForResult(intent,ACTIVITY_SELECT_FROM);    	
+    		
+    	}
+    	return ret;
+    }
+    private ArrayList<String> getProductNames(ArrayList<Product> products)
+    {
+    	ArrayList<String> ret = new ArrayList<String>();
+    	
+    	for (Product prod : products)
+    	{
+    		ret.add(prod.getName());
+    	}
+    	return ret;
+    	
+    	
+    }
+
+	
+private  class BarCodeLookup extends AsyncTask<String, Void, String> {
+    	
+    	// search upc service 
+    	// http://www.searchupc.com/developers/welcome.aspx
+    	private String _searchUPCAccessToken = "2ADB35B4-7F5C-485F-B616-E2E38120EA14";
+    	private String _searchUPCServiceURL = "http://www.searchupc.com/service/UPCSearch.asmx";
+    	//private String _searchUPCServiceWSDL = "http://www.searchupc.com/service/UPCSearch.asmx?wsdl";
+    	private String _searchUPCNamespace = "http://searchupc.com/";
+    	private String errorMessage = null;
+        private ProgressDialog _dialog = null;
+    	@Override
+    	protected void onPreExecute()
+    	{
+    		_dialog=reportAsyncActivityToUser(getString(R.string.looking_up_product_information));
+    	}
+    	
+    	@Override
+        protected String doInBackground(String... productCodes) {
+          String response = "";
+          
+          for (String productCode : productCodes) 
+          {
+            try {
+    			response = LookupProduct(productCode);
+    		} catch (IOException e) {
+    			
+    			errorMessage = e.getMessage();
+    		} catch (XmlPullParserException e) {
+    			
+    			errorMessage  = e.getMessage();
+    		}
+            break;
+          }
+          return response;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+        	_dialog.hide();
+        	processGetProductResult(errorMessage, result);
+        }
+
+
+    	
+    	
+    	/* AWS service
+    	 * must subscribe / pay for it, and uses ws-security
+    	 * private String wsNamespace = "http://webservices.amazon.com/AWSECommerceService/2011-08-01";
+    	 
+    	private String itemLookupMethodName = "ItemLookup";
+    	*/
+    	public String LookupProduct(String barcode) throws IOException, XmlPullParserException
+    	{
+    		String ret = "";
+    		String methodName = "GetProductJSON";
+    		SoapReuest reuest = new SoapReuest(this._searchUPCNamespace, methodName);
+    	
+    		 
+    		 
+    		reuest.addProperty("upc", String.class, barcode);
+    		reuest.addProperty("accesstoken", String.class,this._searchUPCAccessToken);
+
+    		SoapSerializationEnvelope envelope =reuest.wrapInEnvelope();
+    		
+    		 HttpTransportSE androidHttpTransport = new HttpTransportSE(this._searchUPCServiceURL);  
+    		 try {           
+    			 		 
+    			 androidHttpTransport.call(reuest.getSoapAction(), envelope);     
+    			 
+    			 SoapPrimitive response = (SoapPrimitive)envelope.getResponse();             
+    			 ret= response.toString();   
+    			 // next need to get the response and parse the JSON property value
+    			 } 
+    		 
+    		 catch (SoapFault e) {    
+    			 throw new IOException(e.getMessage());
+    		 }     
+    		 return ret;
+    		  
+    	}
+
+
+    }
+
+	
+	
+     
+}

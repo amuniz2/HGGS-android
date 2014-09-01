@@ -1,0 +1,375 @@
+package com.amlm.honeygogroceryshopping.activities;
+
+import java.io.IOException;
+import java.util.ArrayList;
+
+import org.json.JSONException;
+
+import roboguice.inject.InjectView;
+
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.EditText;
+import android.widget.ListView;
+
+import com.amlm.honeygogroceryshopping.FileNameConstants;
+import com.amlm.honeygogroceryshopping.adapters.GroceryListAdapter;
+import com.amlm.honeygogroceryshopping.dataaccess.GroceryFile;
+import com.amlm.honeygogroceryshopping.dataaccess.IDataAccessor;
+import com.amlm.honeygogroceryshopping.model.GroceryItem;
+import com.amlm.honeygogroceryshopping.model.PersistentItem;
+import com.amlm.honeygogroceryshopping.model.serialization.JSONGroceryItem;
+import com.amlm.honeygogroceryshopping.model.serialization.JsonItemList;
+import com.amlm.honeygogroceryshopping.webserviceconsumers.Product;
+
+public class EditCurrentListActivity extends BaseListActivity<GroceryItem> {
+@InjectView(R.id.search_text) EditText _searchText;
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        initUXControls();
+     }
+    private void   initUXControls()
+    {
+    	setContentView(R.layout.activity_edit_current_grocery_list);
+    
+    	getListView().setItemsCanFocus(true);
+    	try {
+    	
+			setupListAdapter();
+		} catch (Exception e) {
+			handleException(getTag(),e);
+			//e.printStackTrace();
+		}    	       
+    }
+   
+
+    @Override
+    public String getTag(){return "EditCurrentGroceryListActivity";}
+   
+
+	@Override
+	public GroceryFile getListFile() {
+        return GroceryFile.JsonFiles.get(FileNameConstants.CurrentFileName);
+	}
+
+	@Override
+	protected ListView getListView() {
+		return (ListView) findViewById(R.id.currentlist);
+	}
+
+    @Override 
+    protected ArrayList<GroceryItem> determineItemsToDisplay() throws IOException, JSONException
+    {
+    	ArrayList<GroceryItem> ret = null;
+		
+		GroceryFile gfile = GroceryFile.JsonFiles.get(FileNameConstants.CurrentFileName);    			
+    
+     	if (getIntent().getBooleanExtra(BaseListActivity.CREATE_NEW_LIST, false) ||
+     		!gfile.exists(this)	)
+    	{	
+     		LoadList task = new LoadList();
+     		task.execute("");
+     		
+     	}
+    	else
+    	{
+    		ret = super.determineItemsToDisplay();
+    	}
+    	return ret;
+    }
+    
+    public void addItem(View view)
+    {
+    	GroceryItem newItem = new GroceryItem();
+    
+    	newItem.setName(_searchText.getText().toString());
+       	_searchText.setText("");
+
+    	//Intent intent = new Intent(this, EditCurrentItemActivity.class);
+    	Intent intent = new Intent(this, EditCurrentItemActivity.class);
+       	intent.putExtra(BaseEditItemActivity.EXTRA_ITEM, newItem);
+       	
+    	this.startActivityForResult(intent, ACTIVITY_ADD);
+    }
+    public void editItem(View view)
+    {
+    	editItem((GroceryItem)view.getTag());
+    }
+    protected void editItem(GroceryItem item)
+    {
+       	Intent intent = new Intent(this, EditCurrentItemActivity.class);
+       	intent.putExtra(EditItemActivity.EXTRA_ITEM, item);
+       	
+    	this.startActivityForResult(intent, ACTIVITY_EDIT);
+    }
+
+    protected void setupListAdapter() throws IOException, JSONException {
+
+    	
+      	ArrayList<GroceryItem> itemsToDisplay=this.determineItemsToDisplay();
+      
+      	if (itemsToDisplay == null)
+      	{
+      		itemsToDisplay = new ArrayList<GroceryItem>();
+      		
+       	}
+      	setupListAdapter(itemsToDisplay);
+      	
+    }
+    private void setupListAdapter(ArrayList<GroceryItem> itemsToDisplay)
+    {
+       	ListView listView = getListView();
+
+    	// Second parameter - Layout for the row
+    	// Third parameter - ID of the TextView to which the data is written
+    	// Forth - the Array of data
+    	GroceryListAdapter adapter = new GroceryListAdapter(this,
+			//android.R.layout.simple_list_item_multiple_choice,
+			getListLayout(),
+			/*R.id.cat_name,*/itemsToDisplay);
+    		adapter.setNotifyOnChange(true);
+  	
+    		this.setAdapter(adapter);
+    	this.setItemsDisplayed(itemsToDisplay );
+
+    	listView.setOnItemClickListener(new OnItemClickListener() 
+    	{
+    		public void onItemClick(AdapterView<?> listView, View cell, int position,
+                long id) 
+    		{      
+    			GroceryListAdapter myAdapter = (GroceryListAdapter) getAdapter();
+    			if  (!myAdapter.isSelected(position))
+    			{
+    	        	 myAdapter.setSelected(position);
+    	        	 myAdapter.notifyDataSetChanged();
+
+    			}
+    	        		
+           
+    		}
+    	});    
+    	listView.setOnItemLongClickListener(new OnItemLongClickListener() 
+    	{
+    		public boolean onItemLongClick(AdapterView<?> listView, View cell, int position,
+                long id) 
+    		{      
+    			editItem((GroceryItem)(listView.getItemAtPosition(position)));
+    	        return true;		
+           
+    		}
+    	});    
+    	
+    	// Assign adapter to ListView
+    	listView.setAdapter(adapter); 
+    	
+    }
+    public void cancel(View v)
+    {
+    	this.finish();
+    }
+   @Override 
+    protected void onStop()
+    {
+    	super.onStop();
+    	saveList();
+    }
+    
+    public void saveList()
+    {
+    	ListView lv = getListView();
+    	((GroceryListAdapter) getAdapter()).saveItemsThatHaveChanged(lv);
+    	this.saveList(this.getItemsDisplayed());
+ 		// because we have modified the shopping list, the previous one should be deleted
+ 		GroceryFile.JsonFiles.get(FileNameConstants.ShoppingListFileName).delete(this);
+
+ //   	this.finish();
+    	
+    }
+  
+    @Override
+	protected void saveList(ArrayList<GroceryItem> itemsToSave) {
+		try 
+		    {
+		  		this.getDM().saveGroceryItems(this.getListFile(),itemsToSave);
+		  	 	    	
+		    }
+			catch (Exception e) {
+				handleException(getTag(), e);
+			}
+	}    
+    @Override
+    protected boolean keywordsInItem(String keywords, GroceryItem item)
+    { return (((item.getName().contains(keywords)) ||
+			(item.getNotes().contains(keywords))));
+    }
+	@Override
+	protected void updateItemInOtherList(GroceryItem itemUpdated, Intent data) {
+			
+		Boolean updateMaster = data.getBooleanExtra(EditCurrentItemActivity.EXTRA_INCLUDE_IN_MASTER, true);
+		if (updateMaster)
+		{
+	   	
+	       	SaveOrUpdateItemInMasterList masterListUpdater = new SaveOrUpdateItemInMasterList();
+	       	try {
+				masterListUpdater.execute(JSONGroceryItem.writeToJsonString(itemUpdated));
+			} catch (Exception e) {
+				this.handleException("Update Master Item", e);
+			} 
+		}
+	}
+    private  class SaveOrUpdateItemInMasterList extends AsyncTask<String, Void, String> {
+    	
+    	//private String _errorMessage = null;
+        @Override
+        protected String doInBackground(String... itemsAsJsonStrings) {
+          String response = "";
+         
+          for (String jsonItem : itemsAsJsonStrings) 
+          {
+            try {
+            	// convert the string to a groceryItem
+            	GroceryItem updatedItem = GroceryItem.fromJSONString(jsonItem);
+            	
+            	// update or add the item in the current shopping list
+            	UpdateOrAddItem(updatedItem);
+    			
+    		} catch (JSONException e) {
+    			// TODO Auto-generated catch block
+    			//_errorMessage  = e.getMessage();
+    		}
+            break;
+          }
+          return response;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+        	//processGetProductResult(errorMessage, result);
+        }
+
+
+    	
+    	
+    	/* AWS service
+    	 * must subscribe / pay for it, and uses ws-security
+    	 * private String wsNamespace = "http://webservices.amazon.com/AWSECommerceService/2011-08-01";
+    	 
+    	private String itemLookupMethodName = "ItemLookup";
+    	*/
+    	public void UpdateOrAddItem(GroceryItem updatedItem) 
+    	{
+    		IDataAccessor dm = getDM();
+    		
+    		try {
+    			GroceryFile file = GroceryFile.JsonFiles.get(FileNameConstants.MasterFileName);
+				ArrayList<GroceryItem> items = dm.loadGroceryItems(file);
+				if (items.contains(updatedItem))
+				{
+			    	PersistentItem itemInList = items.get(items.indexOf(updatedItem));
+					updatedItem.copyTo(itemInList);
+				}
+				else
+				{
+					
+					items.add(updatedItem);
+				}
+				dm.saveGroceryItems(file, items);
+				
+    		} catch (Exception e) {
+				// TODO Auto-generated catch block
+				//_errorMessage = e.getMessage();
+			}
+    		
+    	}
+
+
+    }
+    private void processLoadListResult(String errorMessage, String serializedLIst)
+    {
+       	Product product = null;
+       	if (errorMessage != null)
+       	{
+       		displayMessage("Error creating the grocery list", errorMessage);	
+       	}
+       			
+       	else if ((serializedLIst != null) && !serializedLIst.isEmpty())
+		{
+       		try {
+				setupListAdapter(JsonItemList.parseList(serializedLIst));
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				super.handleException(getTag(), e);
+			}
+		}
+    }
+ private  class LoadList extends AsyncTask<String, Void, String> {
+    	private ProgressDialog _dialog = null;
+    	private String _errorMessage = null;
+        @Override
+        protected String doInBackground(String... productCodes) {
+          String response = "";
+    
+            try {
+    			response = LoadItems();
+    		} catch (Exception e) {
+    			// TODO Auto-generated catch block
+    			_errorMessage = e.getMessage();
+   		}
+          return response;
+        }
+        @Override 
+        protected void onPreExecute()
+        {
+        	_dialog = reportAsyncActivityToUser("Creating this week's grocery list");
+        }
+        @Override
+        protected void onPostExecute(String result) {
+        	_dialog.hide();
+        	processLoadListResult(_errorMessage, result);
+        }
+
+
+    	
+    	
+    	/* AWS service
+    	 * must subscribe / pay for it, and uses ws-security
+    	 * private String wsNamespace = "http://webservices.amazon.com/AWSECommerceService/2011-08-01";
+    	 
+    	private String itemLookupMethodName = "ItemLookup";
+    	*/
+    	public String LoadItems() throws IOException, JSONException 
+    	{
+    		Context context= getApplicationContext();
+    		GroceryFile gfile = GroceryFile.JsonFiles.get(FileNameConstants.CurrentFileName);    			
+     		//IDataAccessor dm =getDM(); 		
+
+     		// since we are creating a new list, we start with what is in the master list, only selecting
+     		// those that are selected by default
+    	    String ret = GroceryFile.JsonFiles.get(FileNameConstants.MasterFileName).read(context);
+    	    
+     		// save this as the current grocery list, so that if they do not make any changes
+     		// to the default, there is a shopping list saved
+    		gfile.save(context, ret);
+     		// because we are starting a new shopping list, the previous one should be deleted
+     		GroceryFile.JsonFiles.get(FileNameConstants.ShoppingListFileName).delete(getApplicationContext());
+    		
+     		return ret;
+    		  
+    	}
+
+
+    }
+
+    
+    
+
+}

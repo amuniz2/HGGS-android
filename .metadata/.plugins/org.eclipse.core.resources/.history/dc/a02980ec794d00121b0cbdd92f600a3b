@@ -1,0 +1,164 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" 
+    android:orientation="vertical" 
+android:background="@drawable/layoutbackground"
+    android:fillViewport="true"
+    >
+
+	<!-- contains all, including action bar -->
+
+	<LinearLayout
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"	
+	 	android:orientation="vertical"
+	 >
+	 
+	    <!-- contains all but action bar -->
+
+	    <LinearLayout
+	        android:id="@+id/linearLayout1"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:orientation="vertical" >
+			<LinearLayout
+   				 android:layout_width="match_parent"
+    			android:layout_height="wrap_content"
+    			android:orientation="horizontal">
+				<Button
+	    	 		android:id="@+id/btnScan"
+	     			android:onClick="scanItem"
+	     			android:layout_width="wrap_content"
+	     			android:layout_height="wrap_content"
+	     			android:text="@string/scan" />
+	        <EditText
+	            android:id="@+id/edit_name"
+	            style="@style/editTextStyle"
+	            android:layout_width="match_parent"
+	            android:hint="@string/edit_item_name" />
+			</LinearLayout>
+	        <LinearLayout
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:layout_marginTop="4sp"
+	            android:orientation="vertical" >
+
+	            <TextView
+					style="@android:style/TextAppearance.Small"
+	                android:layout_width="wrap_content"
+	                android:layout_height="wrap_content"	                
+	                
+	                android:text="@string/quantity"
+	                android:textSize="12sp"
+	                android:textStyle="bold" />
+
+	            <LinearLayout
+	               
+	                android:layout_width="match_parent"
+	                android:layout_height="wrap_content"
+	                android:orientation="horizontal" >
+
+	                <EditText
+	                    android:id="@+id/edit_quantity"
+	                    style="@style/editTextStyle"
+	                    android:layout_width="wrap_content"
+	                    android:hint="@string/enter_quqntity"
+	                    android:inputType="number" />
+
+	                <EditText
+	                    android:id="@+id/edit_unitOrSize"
+	                    style="@style/editTextStyle"
+	                    android:layout_width="0dp"
+	                    android:layout_weight="1"
+	                    android:hint="@string/unit" />
+	            </LinearLayout>
+	        </LinearLayout>
+
+	        <LinearLayout
+	            xmlns:tools="http://schemas.android.com/tools"
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:layout_marginTop="4sp"
+	            android:orientation="vertical" >
+
+	            <TextView
+	                style="@android:style/TextAppearance.Small"
+	                android:layout_width="wrap_content"
+	                android:layout_height="wrap_content"
+	                android:text="@string/select_category"
+	                android:textSize="12sp"
+	                android:textStyle="bold" />
+
+	            <Spinner
+	                android:id="@+id/location_spinner"
+	                android:layout_width="match_parent"	               
+					android:layout_height="wrap_content"
+	                android:hint="@string/select_category" />
+	            
+    			            
+	        </LinearLayout>
+
+	        <LinearLayout
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:layout_marginTop="4sp"
+	            android:background="@drawable/rounded_border"
+	            android:orientation="horizontal" >
+
+	            <CheckBox
+	                android:id="@+id/selectByDefault"
+	                android:layout_width="wrap_content"
+	                android:layout_height="wrap_content"
+	                android:textSize="20sp"
+	                android:textColor="@color/Black"
+	                android:text="@string/select_by_default" 
+	                android:button="@drawable/checkbox_selector" />
+	       
+	            </LinearLayout>
+
+	        <EditText
+	            android:id="@+id/edit_notes"
+	            style="@style/editTextStyle"
+	            android:layout_width="match_parent"
+	             android:layout_height="wrap_content"
+	            android:layout_marginTop="8dp"
+	       
+	            android:hint="@string/edit_notes" />
+	    </LinearLayout>
+
+	    <LinearLayout
+	        xmlns:tools="http://schemas.android.com/tools"
+	        android:layout_width="match_parent"
+	        
+ android:layout_height="wrap_content"
+	            android:orientation="horizontal"
+	        android:layout_marginTop="8dp" >
+
+	        <Button
+	            android:layout_width="0dp"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="1"
+	            android:onClick="cancelEdit"
+	            android:text="@string/button_cancel" 
+	            android:drawableTop="@drawable/ic_delete"/>
+
+	        <Button
+	            android:layout_width="0dp"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="1"
+	            android:onClick="deleteItem"
+	            android:text="@string/button_delete"
+	            android:drawableTop="@drawable/ic_menu_delete"
+
+	        <Button
+	            android:layout_width="0dp"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="1"
+	            android:onClick="applyEdit"
+	            android:text="@string/button_okay" 
+	            android:drawableTop="@drawable/ic_menu_save"/>
+	    </LinearLayout>
+
+</LinearLayout>
+</ScrollView>

@@ -1,0 +1,9 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+      <item android:id="@+id/main_grocerylist_settings"
+        android:title="@string/master_list_settings"
+        android:showAsAction="ifRoom" />
+
+ <item android:id="@+id/dropbox_settings"
+        android:title="@string/dropbox_settings"
+        android:showAsAction="ifRoom"  />    
+ </menu>

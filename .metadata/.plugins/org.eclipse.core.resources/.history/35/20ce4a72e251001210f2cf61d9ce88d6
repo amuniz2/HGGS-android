@@ -1,0 +1,40 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+     android:layout_height="match_parent"     
+    android:orientation="vertical"
+    android:background="@drawable/layoutbackground"
+        >
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/select_activity"
+        android:textSize="20sp"
+        android:textColor="@color/White"
+        tools:context=".MainActivity" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/layoutbackground"
+        android:gravity="center"
+        android:orientation="vertical" >
+
+        <Button
+            android:id="@+id/EditGroceryList"
+            style="@style/startActivityButtonStyle"
+            android:onClick="editGroceryList"
+            android:drawableBottom="@drawable/ic_grocery_list"
+            android:text="@string/edit_grocery_list" />
+
+        <Button
+            android:id="@+id/GoShopping"
+            style="@style/startActivityButtonStyle"
+            android:drawableBottom="@drawable/ic_launcher"
+            android:onClick="goShopping"
+            android:text="@string/go_shopping" />
+    </LinearLayout>
+
+</LinearLayout>

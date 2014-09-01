@@ -1,0 +1,152 @@
+package com.amlm.grocerylistapp.activities;
+
+import java.io.IOException;
+import java.util.ArrayList;
+
+import org.json.JSONException;
+
+import android.content.Intent;
+import android.os.Build;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.EditText;
+import android.widget.ListView;
+
+import com.amlm.grocerylistapp.FileNameConstants;
+import com.amlm.grocerylistapp.adapters.ItemSummaryListAdapter;
+import com.amlm.grocerylistapp.model.GroceryItem;
+
+public class EditMasterListActivity extends BaseListActivity<GroceryItem> {
+
+
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_edit_master_grocery_list);
+        
+        try {
+ 			setupListAdapter();
+ 		} catch (Exception e) {
+ 			MainActivity.reportError(getTag(), e, this);
+ 		}    	
+      //  getListView().setBackgroundResource(color.holo_blue_bright);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.activity_edit_master_grocery_list, menu);
+        return true;
+    }
+    public String getTag() { return "EditMasterGroceryListActivity";}
+    
+
+ 
+    @Override
+    public String getListFileName() {
+    	// TODO Auto-generated method stub
+        return (String)(MainActivity.JsonFileNames.get(FileNameConstants.MasterFileName));
+    
+    }
+    @Override
+    protected  ListView getListView() { return (ListView) findViewById(R.id.masterlist);}
+ 
+   
+    public void addItem(View view)
+    {
+    	GroceryItem newItem = new GroceryItem();
+    
+    	Intent intent = new Intent(this, EditItemActivity.class);
+       	intent.putExtra(EditItemActivity.EXTRA_ITEM, newItem);
+       	
+    	this.startActivityForResult(intent, ACTIVITY_ADD);
+    }
+    
+    protected void editItem(GroceryItem item)
+    {
+       	Intent intent = new Intent(this, EditItemActivity.class);
+       	intent.putExtra(EditItemActivity.EXTRA_ITEM, item);
+       	
+    	this.startActivityForResult(intent, ACTIVITY_EDIT);
+    }
+    protected void searchForItem(View view)
+    {
+    	ArrayList<View> viewsFound = new ArrayList<View>();
+    	EditText et = (EditText)(findViewById(R.id.search_text));
+    	
+    	ListView lv = this.getListView();
+    	 if (Build.VERSION.SDK_INT >= 14)
+    	 {
+    		 lv.findViewsWithText(viewsFound, et.getText().toString(), ViewGroup.FIND_VIEWS_WITH_TEXT);
+    	}
+    	 else
+    	 {
+    		// findViewsWithText(viewsFound, et.getText().toString());
+    	 }
+    	if (viewsFound.size() > 0)
+    	{
+    		View v = viewsFound.get(0);
+    		int pos=lv.getPositionForView(v);
+    		//lv.setSelectionFromTop();
+    		lv.smoothScrollToPosition(pos);
+    		//lv.scrollTo(v.getX(),v.getY());
+    		
+    	}
+    }
+    private void findViewsWithText(ArrayList<View> viewsFound, String keywords)
+    {
+    	ArrayList<GroceryItem> itemsListed = this.getItemsDisplayed();
+    	GroceryItem itemFound;
+    //	getListView().findViewWithTag(tag)
+    }
+    @Override 
+	public void setupListAdapter() throws IOException, JSONException {
+
+    	ListView listView = getListView();
+    	
+      	ArrayList<GroceryItem> itemsToDisplay=this.determineItemsToDisplay();
+      
+      	// First paramenter - Context
+    	// Second parameter - Layout for the row
+     	// Forth - the Array of data
+      	ItemSummaryListAdapter adapter = new ItemSummaryListAdapter(this,
+    			//android.R.layout.simple_list_item_multiple_choice,
+    			getListLayout(),
+    			itemsToDisplay, false);
+      	adapter.setNotifyOnChange(true);
+      	
+      	this.setAdapter(adapter);
+    	this.setItemsDisplayed(itemsToDisplay );
+    	listView.setOnItemClickListener(new OnItemClickListener() 
+      	{
+
+            public void onItemClick(AdapterView<?> listView, View cell, int position,
+                    long id) {
+ 
+            	editItem((GroceryItem)(listView.getItemAtPosition(position)));
+               
+            }
+        });    
+    
+    	
+    	// Assign adapter to ListView
+    	listView.setAdapter(adapter); 
+    }  
+    @Override
+    public void saveList(ArrayList<GroceryItem> items) {
+    	try 
+	    {
+	  		this.getDM().saveGroceryItems(this.getListFileName(),items);
+	  	 	    	
+	    }
+		catch (Exception e) {
+			MainActivity.reportError(getTag(), e, this);
+		}
+    }
+  
+
+}

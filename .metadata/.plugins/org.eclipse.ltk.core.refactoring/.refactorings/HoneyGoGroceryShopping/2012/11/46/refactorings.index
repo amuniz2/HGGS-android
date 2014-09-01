@@ -1,0 +1,13 @@
+1352594783585	Extract method 'saveGroceryList'
+1352597522131	Delete element
+1352598846351	Rename local variable 'masterItems'
+1352606452704	Encapsulate field '_id'
+1352613616612	Delete element
+1352614635474	Encapsulate field '_catSelected'
+1352657408327	Copy compilation unit
+1352657607118	Delete element
+1352686491491	Copy compilation unit
+1352859152061	Copy compilation unit
+1353104336023	Infer generic type arguments
+1353104373245	Infer generic type arguments
+1353193203601	Copy compilation unit

@@ -1,0 +1,42 @@
+package com.example;
+
+import android.widget.Button;
+
+import com.amlm.honeygogroceryshopping.activities.MainActivity;
+import com.amlm.honeygogroceryshopping.activities.R;
+import com.xtremelabs.robolectric.RobolectricTestRunner;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
+
+@RunWith(RobolectricTestRunner.class)
+public class MyActivityTest {
+	private MainActivity _activity;
+	private Button _startGroceryListButton;
+    
+	@Before
+    public void setup()
+    {
+		_activity = new MainActivity();
+		_activity.onCreate(null);
+		_startGroceryListButton = (Button) findViewById(R.id.CreateGroceryList);
+    }
+	@Test
+    public void shouldHaveHappySmiles() throws Exception {
+        String hello = new MainActivity().getResources().getString(R.string.title_activity_main);
+        assertThat(hello, equalTo("Honey, Go Grocery Shopping!"));
+    }
+	@Test 
+	public void shouldNavigateToEditCurrentList()
+	{
+		_startGroceryListButton.performClick();
+		
+	}
+  
+
+}
+

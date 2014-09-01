@@ -1,0 +1,254 @@
+package com.amlm.honeygogroceryshopping.activities;
+
+import java.io.IOException;
+import java.util.ArrayList;
+
+import org.json.JSONException;
+
+import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
+import android.os.Bundle;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.ListView;
+
+import com.amlm.honeygogroceryshopping.adapters.BaseListAdapter;
+import com.amlm.honeygogroceryshopping.dataaccess.GroceryFile;
+import com.amlm.honeygogroceryshopping.model.GroceryItem;
+import com.amlm.honeygogroceryshopping.model.PersistentItem;
+
+
+abstract public class BaseListActivity<T extends PersistentItem> extends DropboxConsumer  {
+	/* constants */
+	public static final int ACTIVITY_ADD = 1;
+	public static final int ACTIVITY_EDIT = 2;
+	public static final String CREATE_NEW_LIST = "CreateNewList";
+	
+
+	/* private data members */
+	private BaseListAdapter<T> _adapter;
+	private ArrayList<T> _itemsDisplayed;
+
+	/* field accessors */
+ 	public BaseListAdapter<T> getAdapter(){return _adapter;}
+	public void setAdapter(BaseListAdapter<T> adapter) {_adapter=adapter;}
+	public ArrayList<T> getItemsDisplayed()
+	{ return _itemsDisplayed; }
+	public void setItemsDisplayed(ArrayList<T> items)
+	{ _itemsDisplayed = items; }
+	
+	/* abstract methods */
+	abstract public GroceryFile getListFile() ;
+    abstract  protected  ListView getListView() ;  
+    abstract protected  boolean keywordsInItem(String keywords, T item);
+     
+ //   abstract protected  void editItem(T item);
+   
+    @TargetApi(11)
+	@Override
+    public void onCreate(Bundle savedInstanceState)
+    {
+    	super.onCreate(savedInstanceState);
+    	
+        if (Build.VERSION.SDK_INT > 10)
+        {
+        	getActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+        
+    }
+    
+      
+   /* common overrides */
+    protected abstract void saveList(ArrayList<T> itemsToSave);
+    protected int getListLayout() 
+    {
+    	return android.R.layout.simple_list_item_1;
+    }
+    protected ArrayList<GroceryItem> determineItemsToDisplay() throws IOException, JSONException
+    {
+    	return this.getDM().loadGroceryItems(this.getListFile());
+    }
+    protected abstract void  setupListAdapter() throws JSONException, IOException; 
+    /*
+     * protected void setupListAdapter() throws IOException {
+     
+
+    	ListView listView = getListView();
+    	
+      	ArrayList<GroceryItem> itemsToDisplay=determineItemsToDisplay();
+      
+      	// First paramenter - Context
+    	// Second parameter - Layout for the row
+    	// Third parameter - ID of the TextView to which the data is written
+    	// Forth - the Array of data
+    	ArrayAdapter<GroceryItem> adapter = new ArrayAdapter<GroceryItem>(this,
+    			//android.R.layout.simple_list_item_multiple_choice,
+    			getListLayout(),
+    			android.R.id.text1,itemsToDisplay);
+      	adapter.setNotifyOnChange(true);
+      	
+      	this.setAdapter(adapter);
+    	this.setItemsDisplayed(itemsToDisplay );
+
+      	
+      	listView.setOnItemClickListener(new OnItemClickListener() 
+      	{
+
+            public void onItemClick(AdapterView<?> listView, View cell, int position,
+                    long id) {
+            	editItem((GroceryItem)(listView.getItemAtPosition(position)));
+               
+            }
+        });    
+    	
+    	// Assign adapter to ListView
+    	listView.setAdapter(adapter); 
+    } */   
+   
+	public abstract String getTag() ;
+	   @TargetApi(14)
+	    public void searchForItem(View view)
+	    {
+	    searchForItemView(view);
+	    }
+	   
+	   @Override
+	    protected void onActivityResult (int requestCode, int resultCode, Intent data) {
+	  
+	    	if (resultCode != RESULT_CANCELED)
+	        {
+	       		ArrayList<T> itemsToSave = getItemsDisplayed();	      	
+				T itemEdited = (T)(data.getSerializableExtra(BaseEditItemActivity.EXTRA_ITEM));
+	    		if(resultCode == RESULT_OK) 
+	    		{		
+		           	if (!itemsToSave.contains(itemEdited))
+				    {
+				    	itemsToSave.add(itemEdited);		        			
+				    }
+				    else
+				    {
+				    	PersistentItem itemInList = itemsToSave.get(itemsToSave.indexOf(itemEdited));
+		           		itemEdited.copyTo(itemInList);
+		           	}
+		           	updateItemInOtherList(itemEdited, data);
+	    		}
+	    		else if (resultCode == BaseEditItemActivity.RESULT_DELETE)
+	    		{
+	             	if (itemsToSave.contains(itemEdited))
+	    			    {
+	    			    	itemsToSave.remove(itemEdited);		        			
+	    			    }
+	    	    			
+	    		}
+	           	getAdapter().notifyDataSetChanged();
+	           	saveList(itemsToSave);
+	        }
+	        
+	    }   
+    @TargetApi(14)
+	public void searchForItemView(View view)
+    {
+    	ArrayList<View> viewsFound = new ArrayList<View>();
+    	EditText et = (EditText)(findViewById(R.id.search_text));
+    	int pos = -1;
+    	
+    	ListView lv = this.getListView();
+    	 if (Build.VERSION.SDK_INT >= 14)
+    	 {
+    		 lv.findViewsWithText(viewsFound, et.getText().toString(), ViewGroup.FIND_VIEWS_WITH_TEXT);
+    	     if (viewsFound.size() > 0)
+    	    {
+    	    		View v = viewsFound.get(0);
+    	    		pos=lv.getPositionForView(v);
+    	    }
+    	}
+    	 else
+    	 {
+    		 pos = findFirstViewsWithText(et.getText().toString());
+    		// findViewsWithText(viewsFound, et.getText().toString());
+    	 }
+    	 if (pos >= 0)	
+    	 {	
+
+    		scrollTo(pos);
+
+    	 }	
+    	 else
+    	 {
+    		 displayMessage("Search Result", "No items found.");
+    	 }
+    	
+    }
+    @TargetApi(11)
+	protected void scrollTo(int pos)
+    {
+    	hideSoftKeyboard();
+    	ListView listView = getListView();
+    	if (android.os.Build.VERSION.SDK_INT >= 11)
+    	{
+    	    listView.smoothScrollToPositionFromTop(pos, 0); 
+    	}
+    	else if (android.os.Build.VERSION.SDK_INT >= 8)
+    	{
+    		//listView.smoothScrollToPosition(pos);
+    	    int firstVisible = listView.getFirstVisiblePosition();
+    	    int lastVisible = listView.getLastVisiblePosition();
+    	    if (pos < firstVisible)
+    	        listView.smoothScrollToPosition(pos);
+    	    else 
+    	        listView.smoothScrollToPosition(pos + lastVisible - firstVisible - 1 );
+    		
+    	}
+    	else
+    	{
+    	    listView.setSelectionFromTop(pos, 0);
+    	}
+    	//select / highlight ?
+    	
+       }
+    protected void hideSoftKeyboard()
+    {
+    	InputMethodManager imm = (InputMethodManager)getSystemService(
+    		      Context.INPUT_METHOD_SERVICE);
+    		imm.hideSoftInputFromWindow(this.getSearchEditText().getWindowToken(), 0);
+    }
+    protected View getSearchEditText()
+    {
+    	return findViewById(R.id.search_text);
+    }
+    
+    protected int findFirstViewsWithText(String keywords)
+    {
+    	ArrayList<T> itemsListed = this.getItemsDisplayed();
+    	T itemFound = null;
+    	int pos = 0;
+    	for (T item : itemsListed)
+    	{
+    		if (keywordsInItem(keywords, item))
+    		
+    		{
+    			itemFound = item;
+    			break;
+    		}
+    		else 
+    		{
+    			pos++;
+    		}
+    		
+    	}
+    	if (itemFound == null)
+    	{
+    		pos = -1;
+    	}	
+    	return pos;
+    }
+    
+    protected void updateItemInOtherList(T itemUpdated, Intent data) {}
+    
+    
+   
+}

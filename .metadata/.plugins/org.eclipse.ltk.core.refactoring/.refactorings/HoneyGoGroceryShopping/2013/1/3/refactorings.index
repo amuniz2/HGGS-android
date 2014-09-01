@@ -1,0 +1,6 @@
+1358133813743	Rename resource 'list_selector.xml'
+1358136855092	Delete element
+1358137979607	Copy file
+1358567818209	Rename type 'ConfirmDeleteReturn'
+1358567857048	Rename field '_confirmDialog'
+1358568039905	Rename method 'onDeleteConfirmed'

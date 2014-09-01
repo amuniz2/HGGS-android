@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal" >
+    <ImageButton
+        style="@style/actionButtonStyle"
+        android:id="@+id/delButton"
+           android:onClick="deleteItem"
+        android:contentDescription="@string/button_delete"
+        android:src="@drawable/ic_menu_delete"
+        android:textColor="@color/Red"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp" />
+    
+    <EditText
+        style="@style/editTextStyle"
+        android:id="@+id/edit_cat_name"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:hint="@string/label_cat" />
+    
+    <EditText
+        android:id="@+id/edit_aisle"
+        	 style="@style/editTextStyle"
+        android:layout_width="wrap_content"
+        android:hint="@string/label_aisle"
+        android:inputType="number" />
+
+</LinearLayout>

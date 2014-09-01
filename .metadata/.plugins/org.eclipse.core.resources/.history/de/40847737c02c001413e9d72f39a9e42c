@@ -1,0 +1,249 @@
+package com.amlm.honeygogroceryshopping.adapters;
+
+
+//import java.lang.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import android.annotation.SuppressLint;
+//import android.annotation.TargetApi;
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+//import android.widget.NumberPicker;
+import android.widget.Spinner;
+import android.widget.TextView;
+
+import com.amlm.honeygogroceryshopping.activities.BaseActivity;
+import com.amlm.honeygogroceryshopping.activities.R;
+import com.amlm.honeygogroceryshopping.model.GroceryItem;
+
+public class GroceryListAdapter extends BaseListAdapter<GroceryItem> 
+{
+	private ArrayList<ItemViewHolder> _viewHolders;
+	public GroceryListAdapter(Context context, int resource,
+			 List<GroceryItem> objects) {
+		super(context, resource, objects);
+		_viewHolders = new ArrayList<ItemViewHolder>();
+	}
+
+	
+	public boolean saveItemsThatHaveChanged(ListView parent)
+	{
+			/* called by the activity prior to saving the list, 
+		 * to save any items that might have been changed and
+		 * not yet saved to the underlying collection
+		 */
+		boolean itemsHaveChanged =false;
+   		for (ItemViewHolder vh : this._viewHolders)
+		{
+			itemsHaveChanged = ( vh.saveChangedValues() || itemsHaveChanged);
+		}
+   		return itemsHaveChanged;
+   		
+	}
+		  
+    
+	
+	    @Override
+	    public View getView(int position, View convertView, ViewGroup parent) {
+	        ItemViewHolder viewHolder = null;
+	        View v = null;
+
+	        int viewType = getItemViewType(position);
+	        if (convertView != null)
+	        {
+	        	viewHolder = (ItemViewHolder)convertView.getTag();
+	        	/* since the view is being re-used, save any values that have been 
+	        	 * changed for item that was previously displayed in the view, 
+	        	 * prior to updating the view with the new item's information
+	        	 */
+	        	viewHolder.saveChangedValues();
+	        	v = convertView;	
+	        	
+	        }
+	        else 
+	        {	             
+	        	LayoutInflater li = (LayoutInflater) getContext().getSystemService(
+	                     Context.LAYOUT_INFLATER_SERVICE);
+
+	            try
+	            {
+	            	v = li.inflate(R.layout.current_item, parent,false);
+	            	viewHolder = new ItemViewHolder(getContext(), v, viewType);        
+	            	v.setTag(viewHolder);
+	            	_viewHolders.add(viewHolder);
+	            	
+	         
+	            }
+	            catch (Exception ex)
+	            {
+	            	BaseActivity.reportError("GoceryListAdapter",ex, getContext());
+	            	
+	            }
+	            
+	        } 
+	        GroceryItem item = getItem(position);
+	        viewHolder.bindTo(item);
+	        if (viewType == VIEW_ITEM_SELECTED)
+	        {
+	        	v.setBackgroundColor(v.getResources().getColor(R.color.LightBlue));
+	        }
+	        else
+	        {
+	        	v.setBackgroundColor(v.getResources().getColor(R.color.Seashell));
+	        	
+	        }
+	        return v;
+	    }
+	    
+
+
+		static class ItemViewHolder {
+	    	View _v;
+	    	int _viewType;
+	    	GroceryItem _item;
+        	CheckBox cbSelected;
+        	TextView editName;
+        	TextView editUnit;
+        	ImageButton editButton;
+        	View viewQuantity;
+        	//static 	private Integer[] _quantities = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
+
+	    	ItemViewHolder(Context context, View itemView, int viewType)
+	    	{	_v = itemView;
+	    		_viewType=viewType;
+	        	editName= (TextView) itemView.findViewById(R.id.edit_item_name);
+	        	cbSelected= (CheckBox) itemView.findViewById(R.id.include_item);
+		        
+		        editUnit = (TextView) itemView.findViewById(R.id.item_unit);
+		        editButton = (ImageButton)itemView.findViewById(R.id.edit_item);
+		        
+		        viewQuantity= createSpinner(context, itemView);
+      		  	
+		        
+		        //initQuantityView(context, itemView);		       
+	    	}
+	    	public boolean saveChangedValues()
+	    	{
+	    		int quantity = getQuantityDisplayed();
+	    		boolean changed = false;
+	    		boolean selected = cbSelected.isChecked();
+	    		if (_item.getQuantity() != quantity)
+	    		{
+	    			changed = true;
+	    			_item.setQuantity(quantity);
+	    		}
+	    		if (_item.getSelected() != selected)
+	    		{
+	    			changed = true;
+	    			_item.setSelected(selected);
+	    		}
+	    		return changed;
+	    		
+	    	}
+	    	@SuppressLint("NewApi")
+			private Double getQuantityDisplayed()
+	    	{
+	    		
+	        		  Spinner spinnerQuantity = (Spinner) viewQuantity; 
+	        		  return (Double)spinnerQuantity.getSelectedItem();
+	        		  //return spinnerQuantity.getSelectedItemPosition() + 1;
+	    	}
+	        public void bindTo(GroceryItem item)
+	        {
+	        			_item=item;
+	               		editName.setText(item.getName());
+	            		cbSelected.setChecked(item.getSelected());
+	            		bindQuantity(item.getQuantity());
+	            		
+	            		editUnit.setText(item.getUnitsOrSize());
+	            		 editButton.setTag(item);
+	        }
+	        @SuppressLint("NewApi")
+			private void bindQuantity(double quantityValue)
+	        {
+	        	Spinner spinnerQuantity = (Spinner) viewQuantity;
+	        	initQuantitySpinner(viewQuantity.getContext(), spinnerQuantity);
+        		spinnerQuantity.setSelection(indexFromQuantity(quantityValue));
+	        }
+	        private int indexFromQuantity(Double value)
+	        {
+	        	return (int)(value - this.getMinimumQuantityValue() / getStep());
+	        	
+	        }
+	        
+	        /*
+	         * @TargetApi(11)
+	         
+			private NumberPicker createNumberPicker(Context context, View parentView)
+	        {
+	        	LinearLayout layout = (LinearLayout)parentView.findViewById(R.id.quantityLinearLayout);
+	        	
+	        	NumberPicker control = new NumberPicker(context);
+	        	
+	        	control.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+	        	control.setMinValue(getMinimumQuantityValue());
+	        	control.setMaxValue(10);
+	        	
+	        	layout.addView(control, 0);
+	        	return control;
+	        }
+			*/
+	      
+	     			private Spinner createSpinner(Context context, View parentView)
+	     	        {
+	     	        	LinearLayout layout = (LinearLayout)parentView.findViewById(R.id.quantityLinearLayout);
+	     	        	
+	     	        	Spinner control = new Spinner(context);
+	    	        	control.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+	     	        	
+	     	        	layout.addView(control, 0);
+	     	        	
+	     	        	return control;
+	     	        }	        
+	     			
+	     	private Double[] getQuantityValues()
+	     	{
+	        	double decimalPortion = _item.getQuantity() % 1;
+	        	_step = (decimalPortion) == 0 ? 1.0 : (decimalPortion <= 0.5) ? decimalPortion : 0.1;  
+	        	_minQuantityValue = Math.max(0, _item.getQuantity() - _step * 5); 
+	        	Double  quantityValues[] ;
+	         	
+	         	quantityValues = new Double[10];
+	         	for (int i = 0; i < 10; i++)
+	         	{
+	         		quantityValues[i] = _minQuantityValue + _step * i;
+	         	}
+	         	return quantityValues;
+	     		
+	     	}
+	     	private Double _step;
+	     	private Double getStep()
+	     	{
+	     		return _step;
+	     	}
+	     	private Double _minQuantityValue;
+	     	private Double getMinimumQuantityValue()
+	     	{
+	     		return _minQuantityValue;
+	     	}
+	        private void initQuantitySpinner(Context context, Spinner spinnerQuantity)
+	        {
+	        	ArrayAdapter<Double> adapter = new ArrayAdapter<Double>(context,
+	        			//android.R.layout.simple_list_item_multiple_choice,
+	         			R.layout.spinner_layout, //R.layout.list_item_text_view,
+	         			getQuantityValues());
+	         	
+	         	adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+	            spinnerQuantity.setAdapter(adapter);
+	        }
+	    }	
+}

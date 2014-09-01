@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.amlm.honeygogroceryshopping.activities"
+    android:versionCode="7"
+    android:versionName="1.1.2" >
+
+    <uses-sdk
+        android:minSdkVersion="10"
+        android:targetSdkVersion="15" />
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application android:icon="@drawable/ic_launcher" android:label="@string/app_name" android:theme="@style/AppTheme"
+        android:windowSoftInputMode="stateHidden" >
+        <activity android:name="com.amlm.honeygogroceryshopping.activities.MainActivity"
+            android:label="@string/title_activity_main" android:theme="@style/AppTheme" 
+            android:windowSoftInputMode="adjustPan">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.amlm.honeygogroceryshopping.activities.EditMasterListActivity"
+            android:label="@string/title_activity_edit_master_grocery_list" android:windowSoftInputMode="stateHidden" >
+            <meta-data android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.amlm.honeygogroceryshopping.activities.MainActivity" />
+        </activity>
+        <activity
+            android:name="com.amlm.honeygogroceryshopping.activities.EditMasterItemActivity"
+            android:label="@string/title_activity_edit_master_item"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name="com.amlm.honeygogroceryshopping.activities.EditCurrentListActivity"
+            android:label="@string/title_activity_edit_current_list"
+            android:windowSoftInputMode="stateHidden" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.amlm.honeygogroceryshopping.activities.MainActivity" />
+        </activity>
+        <!-- android:windowSoftInputMode="adjustPan" -->
+        <activity
+            android:name="com.amlm.honeygogroceryshopping.activities.EditCurrentItemActivity"
+            android:label="@string/title_activity_edit_current_item"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name="com.amlm.honeygogroceryshopping.activities.ShoppingListActivity"
+            android:label="@string/title_activity_shopping_list" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.amlm.honeygogroceryshopping.activities.MainActivity" />
+        </activity>
+        <activity
+            android:name="com.amlm.honeygogroceryshopping.activities.EditAislesActivity"
+            android:label="@string/title_activity_edit_aisles"
+            android:windowSoftInputMode="stateHidden|adjustPan" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.amlm.honeygogroceryshopping.activities.MainActivity" />
+        </activity>
+        <activity
+            android:name="com.amlm.honeygogroceryshopping.activities.EditCategoryListActivity"
+            android:label="@string/title_activity_edit_category_list"
+            android:windowSoftInputMode="adjustPan" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.amlm.honeygogroceryshopping.activities.MainActivity" />
+        </activity>
+        <activity
+            android:name="com.amlm.honeygogroceryshopping.activities.SelectProductActivity"
+            android:label="@string/title_activity_select_product" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.amlm.honeygogroceryshopping.activities.MainActivity" />
+        </activity>
+        <activity
+            android:name="com.dropbox.client2.android.AuthActivity"
+            android:configChanges="orientation|keyboard"
+            android:launchMode="singleTask" >
+            <intent-filter>
+
+                <!-- Change this to be db- followed by your app key -->
+                <data android:scheme="db-t7bb846jrivfl07" />
+
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.amlm.honeygogroceryshopping.activities.SetupDropboxAuthentication"
+            android:label="@string/title_activity_setup_dropbox_authentication" >
+            <intent-filter>
+                <data android:scheme="setupDropbox" />
+
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" >
+                </category>
+                <category android:name="android.intent.category.BROWSABLE" >
+                </category>
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.amlm.honeygogroceryshopping.activities.CreateGroceryStoreActivity"
+            android:label="@string/title_activity_create_grocery_store"
+            android:parentActivityName="com.amlm.honeygogroceryshopping.activities.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.amlm.honeygogroceryshopping.activities.MainActivity" />
+        </activity>
+    </application>
+
+</manifest>

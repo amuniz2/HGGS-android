@@ -1,0 +1,183 @@
+package com.amlm.honeygogroceryshopping.adapters;
+
+
+import java.util.ArrayList;
+import java.util.List;
+
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.ListView;
+import android.widget.TextView;
+
+import com.amlm.honeygogroceryshopping.activities.BaseActivity;
+import com.amlm.honeygogroceryshopping.activities.R;
+import com.amlm.honeygogroceryshopping.model.Category;
+import com.amlm.honeygogroceryshopping.model.GroceryItem;
+
+public class ItemSummaryListAdapter extends BaseListAdapter<GroceryItem> 
+{
+	private ArrayList<ItemViewHolder> _viewHolders;
+	
+	public ItemSummaryListAdapter( Context context, int resource,
+			 List<GroceryItem> objects, boolean multiSelect) {
+		super(context, resource,  objects);
+		_multiSelect = multiSelect;
+		_viewHolders = new ArrayList<ItemViewHolder>();
+	}
+
+	private boolean _multiSelect = false;
+		  
+	    
+	
+	    @Override
+	    public View getView(int position, View convertView, ViewGroup parent) {
+	        ItemViewHolder viewHolder = null;
+	        View v = null;
+
+	        int viewType = getItemViewType(position);
+	        if (convertView != null)
+	        {
+	        	viewHolder = (ItemViewHolder)convertView.getTag();
+	        	/* since the view is being re-used, save any values that have been 
+	        	 * changed for item that was previously displayed in the view, 
+	        	 * prior to updating the view with the new item's information
+	        	 */
+	        	viewHolder.saveChangedValues();
+	        	v = convertView;	
+	        }
+	        else 
+	        {	             
+	        	LayoutInflater li = (LayoutInflater) getContext().getSystemService(
+	                     Context.LAYOUT_INFLATER_SERVICE);
+
+	            try
+	            {
+	            	v = li.inflate(R.layout.item_summary, parent,false);
+	            	viewHolder = new ItemViewHolder(v, viewType, _multiSelect);        
+	            	v.setTag(viewHolder);
+	            	this._viewHolders.add(viewHolder)
+;	            	
+	         
+	            }
+	            catch (Exception ex)
+	            {
+	            	BaseActivity.reportError("ItemSummaryListAdapter",ex, getContext());
+	            	
+	            }
+	            
+	        } 
+	        GroceryItem item = getItem(position);
+	        viewHolder.bindTo(item);
+	        if (viewType == VIEW_ITEM_SELECTED)
+	        {
+	        	v.setBackgroundColor(v.getResources().getColor(R.color.LightBlue));
+	        }
+	        else
+	        {
+	        	v.setBackgroundColor(v.getResources().getColor(R.color.Seashell));
+	        	
+	        }	        
+	        return v;
+	    }
+	  
+	    
+	    public boolean saveItemsThatHaveChanged(ListView parent)
+    	{
+    		/* called by the activity prior to saving the list, 
+    		 * to save any items that might have been changed and
+    		 * not yet saved to the underlying collection
+    		 */
+	    	 boolean itemsHaveChanged =false;
+    		for (ItemViewHolder vh : this._viewHolders)
+    		{
+    			itemsHaveChanged= ( vh.saveChangedValues() || itemsHaveChanged);
+    		}
+    		return itemsHaveChanged;
+    		
+    	}
+
+	    
+		static class ItemViewHolder {
+	    	View _v;
+	    	int _viewType;
+	    	GroceryItem _item;
+        	CheckBox cbChecked;
+	    	TextView vName;
+        	TextView vQuantity;
+        	TextView vUnit;
+        	TextView vNotes;
+        	TextView vCategory;
+        	TextView vLocation;
+        	boolean _multiSelect;
+	    	ItemViewHolder(View itemView, int viewType, boolean multiSelect)
+	    	{
+	    		_v = itemView;
+	    		_viewType=viewType;
+	    		_multiSelect = multiSelect;
+	        	vName= (TextView) itemView.findViewById(R.id.view_name);
+	        	vQuantity= (TextView) itemView.findViewById(R.id.view_quantity);
+		        vUnit = (TextView) itemView.findViewById(R.id.view_unit);
+		        vNotes = (TextView) itemView.findViewById(R.id.view_notes);
+		        vCategory = (TextView) itemView.findViewById(R.id.view_category);
+		        vLocation = (TextView) itemView.findViewById(R.id.view_location);
+	        	cbChecked= (CheckBox) itemView.findViewById(R.id.checked_item);
+	        	cbChecked.setVisibility((_multiSelect ? View.VISIBLE : View.GONE));
+		        
+		      
+	    	}
+	    	
+	        public void bindTo(GroceryItem item)
+	        {
+	        	Category cat = item.getCategory();
+	        			_item=item;
+	               		vName.setText(item.getName());
+	            		if (_multiSelect)
+	            		{
+	            			cbChecked.setChecked(item.getSelected());
+	            		}
+	            		vQuantity.setText(formatQuantity(item.getQuantity()));
+	            		vUnit.setText(item.getUnitsOrSize());
+	            		vNotes.setText(item.getNotes());
+	            		vCategory.setText(cat.getName());
+	            		vLocation.setText(String.valueOf(cat.getOrder()));
+	        }
+	    	public void saveItemsThatHaveChanged(ListView parent, int firstPosition, int lastPosition)
+	    	{
+	    		View v;
+	    		ItemViewHolder holder;
+	    		
+	    		/* called by the activity prior to saving the list, 
+	    		 * to save any items that might have been changed and
+	    		 * not yet saved to the underlying collection
+	    		 */
+	    		for (int i = 0; i <= (lastPosition-firstPosition); i++)
+	    		{
+	    			v = parent.getChildAt(i);
+	    			if (v != null)
+	    			{
+	    				holder = (ItemViewHolder)v.getTag();
+	    				holder.saveChangedValues();
+	    			}
+	    		}
+	    	}
+	    	public boolean saveChangedValues()
+	    	{
+	    		boolean changed = false;
+	    		if (_multiSelect)
+	    		{
+	    			boolean selected = this.cbChecked.isChecked();
+	    			
+	    			if (_item.getSelected() != selected)
+	    			{
+	    				changed = true;
+	    				_item.setSelected(selected);
+	    			}
+	    		}
+	    		return changed;
+	    	}
+	    	
+	    }	
+}

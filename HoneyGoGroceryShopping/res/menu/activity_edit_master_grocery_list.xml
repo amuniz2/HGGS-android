@@ -1,0 +1,12 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+  
+    <item android:id="@+id/aisle_settings"
+        android:title="@string/aisle_settings"
+        android:showAsAction="ifRoom"  />
+    
+  <item android:id="@+id/dropbox_settings"
+        android:title="@string/dropbox_settings"
+        android:showAsAction="ifRoom"  />       
+
+    
+</menu>

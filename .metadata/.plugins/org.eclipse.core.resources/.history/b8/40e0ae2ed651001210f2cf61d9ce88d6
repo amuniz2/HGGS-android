@@ -1,0 +1,70 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+     android:layout_height="match_parent" 
+    
+    android:orientation="vertical"
+    android:background="@drawable/layoutbackground"
+         >
+
+    <TextView
+        android:id="@+id/textView1"
+        style="@style/activityTitleStyle"
+        android:text="@string/select_activity"
+        tools:context=".MainActivity" />
+
+<ScrollView 
+    
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" 
+    android:orientation="vertical" >    
+
+    <LinearLayout 
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/layoutbackground" >
+
+ 	<Button
+ 	    android:id="@+id/ManageCategories"
+        style="@style/startActivityButtonStyle"
+ 	    android:text="@string/manage_categories"
+ 	    android:onClick="editCategories" />
+
+ 		<Button
+ 	    android:id="@+id/EditMasterGroceryList"
+        style="@style/startActivityButtonStyle"
+ 	    android:text="@string/edit_master_grocery_list"
+ 	    android:onClick="editMasterGroceryList" />
+ 	
+   
+     <Button
+         android:id="@+id/StartGroceryList"
+        style="@style/startActivityButtonStyle"
+         android:text="@string/create_new_grocery_list"
+         android:onClick="createGroceryList"
+         />
+
+   <Button
+         android:id="@+id/EditGroceryList"
+        style="@style/startActivityButtonStyle"
+         android:text="@string/edit_grocery_list"
+         android:onClick="editGroceryList" />
+     
+        <Button
+        android:id="@+id/GoShopping"
+        style="@style/startActivityButtonStyle"
+        android:text="@string/go_shopping"
+         android:onClick="goShopping" />
+ 		 	
+ 	 <!-- Button
+ 	    android:id="@+id/Exit"
+        style="@style/startActivityButtonStyle"
+ 	    android:text="@string/exit"
+ 	    android:onClick="exit" / -->
+ 	 
+ 	 
+ 		
+</LinearLayout>
+</ScrollView>
+</LinearLayout>

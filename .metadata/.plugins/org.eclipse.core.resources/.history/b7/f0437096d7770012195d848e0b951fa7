@@ -1,0 +1,468 @@
+package com.amlm.honeygogroceryshopping.activities;
+
+import java.io.IOException;
+import java.util.ArrayList;
+
+import org.json.JSONException;
+
+import android.annotation.TargetApi;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.os.AsyncTask;
+import android.os.Build;
+import android.os.Bundle;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Adapter;
+import android.widget.EditText;
+import android.widget.ListView;
+
+import com.amlm.honeygogroceryshopping.FileNameConstants;
+import com.amlm.honeygogroceryshopping.adapters.BaseListAdapter;
+import com.amlm.honeygogroceryshopping.dataaccess.DataCache;
+import com.amlm.honeygogroceryshopping.interfaces.IGroceryFile;
+import com.amlm.honeygogroceryshopping.model.Category;
+import com.amlm.honeygogroceryshopping.model.GroceryItem;
+import com.amlm.honeygogroceryshopping.model.PersistentItem;
+
+
+abstract public class BaseListActivity<T extends PersistentItem> extends GroceryFileConsumer /*implements IDataAccessor*/ {
+	/* constants */
+	public static final int ACTIVITY_ADD = 1;
+	public static final int ACTIVITY_EDIT = 2;
+	public static final String CREATE_NEW_LIST = "CreateNewList";
+	
+
+	/* private data members */
+	private BaseListAdapter<T> _adapter;
+	private ArrayList<T> _itemsDisplayed;
+	private boolean _modified = false;
+
+	public boolean getModified() {return _modified;}
+	public void setModified(boolean value){_modified = value;}
+	/* field accessors */
+ 	public BaseListAdapter<T> getAdapter(){return _adapter;}
+	public void setAdapter(BaseListAdapter<T> adapter) {_adapter=adapter;}
+	public ArrayList<T> getItemsDisplayed()
+	{ return _itemsDisplayed; }
+	public void setItemsDisplayed(ArrayList<T> items)
+	{ _itemsDisplayed = items; }
+	
+	/* abstract methods */
+	abstract public IGroceryFile getListFile() ;
+	abstract public FileNameConstants getFileNameConstant();
+    abstract  protected  ListView getListView() ;  
+    abstract protected  boolean keywordsInItem(String keywords, T item);
+    
+    protected abstract void saveList() ;
+     
+ //   abstract protected  void editItem(T item);
+   
+    @TargetApi(11)
+	@Override
+    public void onCreate(Bundle savedInstanceState)
+    {
+    	super.onCreate(savedInstanceState);
+    	
+        if (Build.VERSION.SDK_INT > 10)
+        {
+        	getActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+        
+    }
+	   protected void onFinsihedSave() 
+		 {
+			// super.onStop();
+		 }
+	   @Override 
+	    protected void onStop()
+	    {
+	    	// save the list 
+	    	saveList();
+	    	/*
+	    	 * if (!getModified())
+	    	 
+	    	{	
+	    		// if changes needed to be saved to disk, then the changes may 
+	    		// still be in the process of getting saved asynchronously
+	    		// in this case, the onStop() is processed after the async task 
+	    		// completes
+	    		//
+	    		// if no changes needed to be saved, stop the activity now
+	    		super.onStop();
+	    	}
+	    	*/
+	    	setModified(false);
+	    	// ui thread needs to call onStop() or android exception results
+	    	super.onStop();
+	    	
+	    }
+	   protected  void onFinishedLoad(String errorMessage, String serializedList)
+	   {
+	       //	Product product = null;
+	       	if (errorMessage != null)
+	       	{
+	       		displayMessage("Error loading the grocery list", errorMessage);	
+	       	}
+	       			
+	       	else 
+			{
+	       		try {
+	       			if ((serializedList != null) && !serializedList.isEmpty())
+	       			{
+	       				//setupListAdapter((ArrayList<T>) _groceryListSerializer.parseList(serializedList));
+	       				setupGenericListAdapter( _groceryListSerializer.parseList(serializedList));
+	       			}
+	       			else
+	       			{
+	       				setupListAdapter(new ArrayList<T>());
+	       				
+	       			}
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					super.handleException(getTag(), e);
+				}
+			}		
+	       	
+	   }
+   /* common overrides */
+    protected abstract void saveList(ArrayList<T> itemsToSave);
+	@SuppressWarnings("unchecked")
+	private void setupGenericListAdapter(ArrayList<GroceryItem> list)
+	{
+		setupListAdapter((ArrayList<T>) list);
+	}
+	public void asyncSaveGroceryItems(FileNameConstants efn,
+			ArrayList<GroceryItem> items) throws IOException,
+			JSONException 
+	{
+    	items.trimToSize();
+    	GroceryFileSaver fileSaver = new GroceryFileSaver(efn);
+    	fileSaver.execute(_groceryListSerializer.writeList(items));
+    	//this.saveGroceryFile(efn, JsonItemList.writeList(items));
+    	
+		
+	}
+	// only making this public for testing purposes !!
+	public void asynncSaveCategories(ArrayList<Category> cats)
+			throws IOException, JSONException 
+	{
+		
+	   	cats.trimToSize();
+    	// if ends with "json"
+    	GroceryFileSaver fileSaver = new GroceryFileSaver(FileNameConstants.CategoryListFileName);
+    	fileSaver.execute(_categoriesSerializer.writeList(cats));
+        DataCache.setCategories(cats) ;
+		
+	}
+    protected int getListLayout() 
+    {
+    	return android.R.layout.simple_list_item_1;
+    }
+    protected  ArrayList<T> determineItemsToDisplay() throws IOException, JSONException
+    {
+    	GroceryFileReader fileLoader = new GroceryFileReader();
+    	fileLoader.execute(this.getFileNameConstant());
+    	return null;
+    }
+    protected  void setupListAdapter() throws IOException, JSONException {
+
+    	
+      	ArrayList<T> itemsToDisplay=this.determineItemsToDisplay();
+      
+      	if (itemsToDisplay != null)
+      	{
+      		//itemsToDisplay = new ArrayList<T>();
+      		setupListAdapter(itemsToDisplay);	
+       	}
+      	
+      	
+    }   
+    protected abstract void setupListAdapter(ArrayList<T> itemsToDisplay);
+    
+	public abstract String getTag() ;
+	   @TargetApi(14)
+	    public void searchForItem(View view)
+	    {
+	    searchForItemView(view);
+	    }
+	   
+	   // only making this public to enable unit testing!
+	   public void processActivityResult (int requestCode, int resultCode, Intent data)
+	   {
+	       	int pos =Adapter.NO_SELECTION;
+
+	    	if (resultCode != RESULT_CANCELED)
+	        {
+	       		ArrayList<T> itemsToSave = getItemsDisplayed();
+	       		
+				@SuppressWarnings("unchecked")
+				T itemEdited = (T)(data.getSerializableExtra(BaseEditItemActivity.EXTRA_ITEM));
+	    		
+				if(resultCode == RESULT_OK) 
+	    		{		
+	    			setModified(true);
+	    			if (itemsToSave == null)
+	    			{
+	    				itemsToSave = new ArrayList<T>();
+	    			}
+		           	if (!itemsToSave.contains(itemEdited))
+				    {
+				    	itemsToSave.add(itemEdited);		  
+				    	pos = itemsToSave.indexOf(itemEdited);
+				    }
+				    else
+				    {
+				    	pos = itemsToSave.indexOf(itemEdited);
+				    	PersistentItem itemInList = itemsToSave.get(pos);
+		           		itemEdited.copyTo(itemInList);
+		           	}
+		           	updateItemInOtherList(itemEdited, data);
+	    		}
+	    		else if (resultCode == BaseEditItemActivity.RESULT_DELETE)
+	    		{
+	    	      	// if an item was selected, it should no longer be selected
+	    	       	// when we return
+	    	       
+	             	if (itemsToSave.contains(itemEdited))
+	    			    {
+	    			    	itemsToSave.remove(itemEdited);		    
+	    			    	setModified(true);
+	    			    }
+	    	    			
+	    		}
+	           	getAdapter().setSelected(pos);
+	           	getAdapter().notifyDataSetChanged();
+	           	//saveList(itemsToSave);
+	        }
+	        
+		   
+	   }
+	   @Override
+	    protected void onActivityResult (int requestCode, int resultCode, Intent data) {
+		   processActivityResult(requestCode, resultCode, data);
+	    }   
+    @TargetApi(14)
+	public void searchForItemView(View view)
+    {
+    	
+    	EditText et = (EditText)(findViewById(R.id.search_text));
+    	int pos = findFirstItemsWithText(et.getText().toString());
+    	ListView lv = this.getListView();
+    	if (pos >= 0)
+    	{
+    		int firstVisible = lv.getFirstVisiblePosition();
+    		int lastVisible = lv.getLastVisiblePosition();
+    		
+    		if ((pos >= firstVisible) && (pos <= lastVisible))
+    		{
+    			selectItemAtPosition(pos);
+    		}	
+    		else
+    		{
+    			scrollTo(pos);
+    		}
+    	}
+    	else
+    		{
+    		displayMessage("Search Result", "No items found.");
+    		}
+  		 
+    	/* if (Build.VERSION.SDK_INT >= 14)
+    	 {
+    		
+    		 lv.findViewsWithText(viewsFound, et.getText().toString(), ViewGroup.FIND_VIEWS_WITH_TEXT);
+    	     if (viewsFound.size() > 0)
+    	    {
+    	    		View v = viewsFound.get(0);
+    	    		pos=lv.getPositionForView(v);
+    	    }
+    	}
+    	 else
+    	 {
+    		 pos = findFirstItemsWithText(et.getText().toString());
+    		// findViewsWithText(viewsFound, et.getText().toString());
+    	 }
+    	 if (pos >= 0)	
+    	 {	
+
+    		scrollTo(pos);
+
+    	 }	
+    	 else
+    	 {
+    		 displayMessage("Search Result", "No items found.");
+    	 }
+    	*/
+    }
+    private void selectItemAtPosition(int pos)
+    {
+    	
+    	getAdapter().setSelected(pos);
+    	getAdapter().notifyDataSetChanged();
+    }
+   // @TargetApi(11)
+	protected void scrollTo(int pos)
+    {
+    	hideSoftKeyboard();
+    	ListView listView = getListView();
+    	getAdapter().setSelected(pos);
+    	// do wewant to do this??
+    	//listView.setSelection(pos);
+    	if (android.os.Build.VERSION.SDK_INT >= 11)
+    	{
+    	    listView.smoothScrollToPositionFromTop(pos, 0);
+    	    //listView.setSelection(pos);
+    	    
+    	}
+    	else if (android.os.Build.VERSION.SDK_INT >= 8)
+    	{
+    		listView.smoothScrollToPosition(pos);
+    	    /*int firstVisible = listView.getFirstVisiblePosition();
+    	    int lastVisible = listView.getLastVisiblePosition();
+    	    if (pos < firstVisible)
+    	        listView.smoothScrollToPosition(pos);
+    	    else 
+    	        listView.smoothScrollToPosition(pos + lastVisible - firstVisible - 1 );
+    		*/
+    	}
+    	else
+    	{
+    		listView.smoothScrollToPosition(pos);
+    	   // listView.setSelectionFromTop(pos, 0);
+    	}
+    	getAdapter().notifyDataSetChanged();
+    	//select / highlight ?
+    	
+       }
+    protected void hideSoftKeyboard()
+    {
+    	View et = this.getSearchEditText();
+    	if (et != null)
+    	{
+    		InputMethodManager imm = (InputMethodManager)getSystemService(
+    		      Context.INPUT_METHOD_SERVICE);
+    		imm.hideSoftInputFromWindow(et.getWindowToken(), 0);
+    	}
+    }
+    protected View getSearchEditText()
+    {
+    	return findViewById(R.id.search_text);
+    }
+    
+    protected int findFirstItemsWithText(String keywords)
+    {
+    	ArrayList<T> itemsListed = this.getItemsDisplayed();
+    	T itemFound = null;
+    	int pos = 0;
+    	for (T item : itemsListed)
+    	{
+    		if (keywordsInItem(keywords, item))
+    		
+    		{
+    			itemFound = item;
+    			break;
+    		}
+    		else 
+    		{
+    			pos++;
+    		}
+    		
+    	}
+    	if (itemFound == null)
+    	{
+    		pos = -1;
+    	}	
+    	return pos;
+    }
+
+    protected void updateItemInOtherList(T itemUpdated, Intent data) {}
+    
+      
+	   class GroceryFileReader extends AsyncTask<FileNameConstants,Void, String>
+	   {
+		   private ProgressDialog _dialog = null;
+	    	private String _errorMessage = null;
+			
+	        @Override 
+	        protected void onPreExecute()
+	        {
+	        	_dialog = reportAsyncActivityToUser("Reading grocery file...");
+	        }
+	       
+	        @Override
+	        protected void onPostExecute(String result)
+	        {
+	        	_dialog.hide();
+	        	onFinishedLoad(_errorMessage, result);
+	        	//onDropboxConsumerInitialized();
+	        }
+	        
+			@Override
+			protected String doInBackground(FileNameConstants... params) 
+			{
+			
+				String ret = new String("");
+		    	
+				for (FileNameConstants fn : params)
+				{
+					ret = readGroceryFile(fn);
+					break;
+				}
+			    return ret;					
+			}
+			
+	   }
+	   private class GroceryFileSaver extends  AsyncTask<String,Void, Void>
+		{
+		  	private ProgressDialog _dialog = null;
+	    	//private String _errorMessage = null;
+	    	private FileNameConstants _efn;
+
+			public GroceryFileSaver(FileNameConstants efn)
+			{
+				super();
+				_efn = efn;
+			}
+	        @Override 
+	        protected void onPreExecute()
+	        {
+	        	_dialog = reportAsyncActivityToUser("Saving grocery file...");
+	        }
+	       
+	        @Override
+	        protected void onPostExecute(Void result)
+	        {
+	        	_dialog.hide();
+	        	onFinsihedSave();
+	        }
+	        
+			
+
+			@Override
+			protected Void doInBackground(String... params) {
+				// TODO Auto-generated method stub
+				
+		    	
+		    	
+				for (String fileContents : params)
+				{
+			    	
+			    	
+			    	try {
+			    		saveGroceryFile(_efn, fileContents);
+					
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						handleException("Save grocery file", e);
+					}
+			    	break;
+				}
+					return null;
+			}
+			
+		}		  
+   
+
+}

@@ -1,0 +1,108 @@
+package com.amlm.honeygogroceryshopping.tests.mocks.serializers;
+
+import java.io.IOException;
+import java.util.UUID;
+
+import org.json.JSONException;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
+import com.amlm.honeygogroceryshopping.interfaces.IGroceryItemSerializer;
+import com.amlm.honeygogroceryshopping.model.Category;
+import com.amlm.honeygogroceryshopping.model.GroceryItem;
+import com.amlm.honeygogroceryshopping.model.serialization.JsonTags;
+
+public class MockJsonGroceryItem implements IGroceryItemSerializer
+{
+    
+	public  GroceryItem parseFromJsonString(String text)   throws org.json.JSONException
+	{
+		JSONParser parser = new JSONParser();
+		GroceryItem ret = null;
+   	 	JSONObject jsonItem;
+		try {
+			jsonItem = (JSONObject)parser.parse(text);
+	   	 	ret = MockJsonGroceryItem.parseFromJson(jsonItem);
+		} catch (Exception e) {
+			throw new org.json.JSONException(e.getMessage());
+		}
+		return ret;
+
+	}
+	private static String getCategoryName(JSONObject jsonItem) throws JSONException
+	{
+		
+		String catIdAsString = (String)jsonItem.get(JsonTags.TAG_CATEGORY_ID);
+		if (catIdAsString != null)
+			return Category.IdToName(UUID.fromString(catIdAsString));
+			
+		return (String)jsonItem.get(JsonTags.TAG_CATEGORY_NAME);	
+		
+	}	
+	public static  GroceryItem parseFromJson(JSONObject jsonItem) throws JSONException  
+	{
+		
+		try
+		{
+			GroceryItem ret = new GroceryItem(
+   	 				(String)jsonItem.get(JsonTags.TAG_NAME),
+   	 				//itemId,
+   	 				Integer.valueOf(jsonItem.get(JsonTags.TAG_QUANTITY).toString()),
+   	 				(String) jsonItem.get(JsonTags.TAG_UNIT), 			
+   	 			getCategoryName(jsonItem),
+   	 		Boolean.valueOf(jsonItem.get(JsonTags.TAG_SELECTED).toString()),
+   	 		(String)jsonItem.get(JsonTags.TAG_NOTES));  	 				
+   	 		return ret;
+		}
+		 catch (Exception e) {
+				// TODO Auto-generated catch block
+				//e.printStackTrace();
+				throw new org.json.JSONException(e.getMessage());
+			}
+   	        
+   	 	
+
+	}
+	public  String writeToJsonString(GroceryItem item) throws org.json.JSONException, IOException
+	{
+		
+		String ret = new String ("");
+		try
+		{
+			JSONObject jsonItem = writeToJson(item);
+			ret= jsonItem.toString();
+		}
+		catch(Exception ex)
+		{
+			throw new org.json.JSONException(ex.getMessage());
+		}
+        return ret;
+	}
+        
+	
+	public static  JSONObject writeToJson(GroceryItem item) 
+	{
+	
+        	JSONObject jsonItem = new JSONObject();
+        	putJsonAttribute(jsonItem,JsonTags.TAG_NAME, item.getName());
+        	putJsonAttribute(jsonItem,JsonTags.TAG_SELECTED, Boolean.toString(item.getSelected()));
+        	//putJsonAttribute(jsonItem,JsonTags.TAG_ID, item.getId().toString());	            	
+        	//putJsonAttribute(jsonItem,JsonTags.TAG_CATEGORY_ID, item.getCategoryId().toString());	        
+        	putJsonAttribute(jsonItem,JsonTags.TAG_CATEGORY_NAME, item.getCategoryName().toString());	        
+        	putJsonAttribute(jsonItem,JsonTags.TAG_NOTES, item.getNotes());
+        	putJsonAttribute(jsonItem,JsonTags.TAG_LAST_PURCHASED_DATE, item.getLastPurchasedDate().toString());
+        	putJsonAttribute(jsonItem,JsonTags.TAG_QUANTITY, Double.toString(item.getQuantity()));
+        	putJsonAttribute(jsonItem,JsonTags.TAG_UNIT, item.getUnitsOrSize());
+        	
+        
+        return jsonItem;
+        
+        
+	}
+	@SuppressWarnings("unchecked")
+	private static void putJsonAttribute(JSONObject obj, String tag, String value)
+	{
+		obj.put(tag, value);
+	}
+
+}

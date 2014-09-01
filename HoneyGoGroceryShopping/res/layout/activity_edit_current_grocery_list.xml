@@ -1,0 +1,75 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" 
+   android:orientation="vertical"
+    android:showDividers="none" 
+    android:background="@drawable/layoutbackground">
+	
+<LinearLayout 
+    android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="bottom"
+   >    
+ <ImageButton
+      style="@style/searchAddButtonStyle"
+      android:id="@+id/add_button"
+         android:src="@drawable/ic_menu_add"
+        android:contentDescription="@string/button_add"
+ android:layout_weight="1"
+    android:layout_width="0dp"        
+        android:onClick="addItem" />       
+    
+     <EditText
+        android:id="@+id/search_text"
+        style="@style/searchTextStyle"
+        android:layout_weight="5"
+   		 android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:hint="@string/enter_search_keywords" />
+    
+         <ImageButton
+             style="@style/searchAddButtonStyle"
+             android:id="@+id/search_button"
+             android:contentDescription="@string/button_search"
+             android:onClick="searchForItem"
+         	 android:layout_marginRight="2dp"    
+ android:layout_weight="1"
+    android:layout_width="0dp"
+                 android:src="@drawable/ic_btn_search" />
+
+          
+  </LinearLayout>
+
+       
+    
+    <ListView
+        android:id="@+id/currentlist"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:transcriptMode="normal"
+         android:descendantFocusability="beforeDescendants"        
+         >
+        
+    </ListView>
+ 	<!-- LinearLayout android:layout_width="match_parent"
+    	android:layout_height="wrap_content"
+    	android:orientation="horizontal" >
+     	<Button
+     	    style="@style/dialogButtonStyle"
+         	android:id="@+id/cancelButton"
+        	android:text="@string/button_cancel"
+        	android:drawableLeft="@drawable/ic_delete"
+        	android:onClick="cancel" />
+     		
+      	<Button
+     	    style="@style/dialogButtonStyle"     	    
+         	android:id="@+id/saveButton"
+        	android:text="@string/button_okay"
+        	android:drawableLeft="@drawable/ic_menu_save"
+        	android:onClick="saveList" />
+    </LinearLayout -->	    
+
+</LinearLayout>

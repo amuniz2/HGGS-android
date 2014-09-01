@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/storeLayout" android:background="@drawable/layoutbackground"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+   >
+
+    <LinearLayout
+        android:layout_alignParentTop="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/topControls"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:text="@string/select_grocery_store_label"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/add_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/button_add"
+            android:gravity="right"
+            android:onClick="addStore"
+            android:src="@drawable/ic_menu_add"
+            android:visibility="gone" />
+
+        <ImageButton
+            android:id="@+id/edit_item"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/edit"
+            android:gravity="right"
+            android:onClick="editStores"
+            android:src="@drawable/ic_menu_edit" />
+    </LinearLayout>
+
+
+        <ListView
+            android:id="@+id/lvGroceryStores"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            
+			android:layout_below="@id/topControls"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp"
+            android:choiceMode="singleChoice"
+            android:descendantFocusability="beforeDescendants"
+            android:transcriptMode="normal" />
+
+        <LinearLayout
+            android:id="@+id/editButtons"
+            android:layout_below="@id/lvGroceryStores"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp"
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal"
+            android:visibility="gone" >
+
+            <Button
+                android:id="@+id/button_cancel"
+                style="@style/dialogButtonStyle"
+                android:drawableTop="@drawable/ic_delete"
+                android:onClick="cancelEdit"
+                android:text="@string/button_cancel" />
+
+            <Button
+                android:id="@+id/button_save"
+                style="@style/dialogButtonStyle"
+                android:drawableTop="@drawable/ic_menu_save"
+                android:onClick="applyEdit"
+                android:text="@string/button_save" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/activityButtons"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@id/lvGroceryStores"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+             android:layout_marginTop="4dp" 
+            android:orientation="vertical" >
+
+            <Button
+                android:id="@+id/CreateGroceryList"
+                style="@style/startActivityButtonStyle"
+                android:drawableBottom="@drawable/ic_new_grocery_list"
+                android:onClick="createGroceryList"
+                android:text="@string/create_new_grocery_list" />
+
+            <Button
+                android:id="@+id/EditGroceryList"
+                style="@style/startActivityButtonStyle"
+                android:drawableBottom="@drawable/ic_grocery_list"
+                android:onClick="editGroceryList"
+                android:text="@string/edit_grocery_list" />
+
+            <Button
+                android:id="@+id/GoShopping"
+                style="@style/startActivityButtonStyle"
+                android:drawableBottom="@drawable/ic_launcher"
+                android:onClick="goShopping"
+                android:text="@string/go_shopping" />
+        </LinearLayout>
+    
+
+</RelativeLayout>

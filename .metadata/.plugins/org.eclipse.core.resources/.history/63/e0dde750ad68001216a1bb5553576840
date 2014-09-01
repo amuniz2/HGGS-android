@@ -1,0 +1,125 @@
+package com.amlm.honeygoshopping.activities.test;
+
+
+
+
+import modules.MockGroceryFileModule;
+
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import roboguice.RoboGuice;
+import roboguice.test.RobolectricRoboTestRunner;
+
+import com.amlm.honeygogroceryshopping.activities.EditAisleActivity;
+import com.amlm.honeygogroceryshopping.interfaces.IGroceryFile;
+import com.google.inject.util.Modules;
+import com.xtremelabs.robolectric.Robolectric;
+
+@RunWith(RobolectricRoboTestRunner.class)
+public class EditAisleActivityTest  {
+    
+    //protected IGroceryFile _groceryFileMock = EasyMock.createMock(IGroceryFile.class);
+
+	// set this to the count for this test case
+	public static final int ADAPTER_COUNT = 0;
+	public static final int INITIAL_POSITION = 0;
+	
+	public EditAisleActivityTest(
+			Class<EditAisleActivity> activityClass) {
+
+		// TODO Auto-generated constructor stub
+	}
+	
+	   @Before
+	    public void setup() {
+		    //_activity = this.
+	        // Override the default RoboGuice module
+		    	RoboGuice.setBaseApplicationInjector(Robolectric.application, RoboGuice.DEFAULT_STAGE, Modules.override(RoboGuice.newDefaultRoboModule(Robolectric.application)).with(new MockGroceryFileModule()));
+	    }
+	    
+	    @After
+	    public void teardown() {
+	        // Don't forget to tear down our custom injector to avoid polluting other test classes
+	        RoboGuice.util.reset();
+	    }
+	/*
+	 * @Override
+	  protected void setUp() throws Exception {
+	    super.setUp();
+
+	    setActivityInitialTouchMode(false);
+
+	    _activity = getActivity();
+
+	      _etSearch = (EditText)_activity.findViewById(R.id.search_text);
+		  _btnSearch = (ImageButton) _activity.findViewById(R.id.btnSearch);
+		//private ImageButton _btnAdd;
+		_lvCategories = (ListView) _activity.findViewById(R.id.categorylist);	    
+	  //  _btnCancel = (Button) _activity.findViewById(R.id.cancelButton);
+	   // _btnSave = (Button) _activity.findViewById(R.id.saveButton);
+
+	      _catAdapter = _lvCategories.getAdapter();
+
+	  } // end of setUp() method definition
+	
+	public void testPreConditions() {
+		
+	    assertTrue(_lvCategories != null);
+	    assertTrue(_lvCategories.getOnItemClickListener() != null);
+	    assertTrue(_catAdapter != null);
+	    assertEquals(_catAdapter.getCount(),ADAPTER_COUNT);
+	  } // end of testPreConditions() method definition
+	*/
+	@Test
+	public void testDisplayOfEmptyLists() 
+	{
+		try {
+				//_groceryFileMock.read();
+				
+			//	replay(_groceryFileMock);
+			//	verify(_groceryFileMock);		
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+	
+	/*public void testListOfCategoriesUI() {
+
+	    _activity.runOnUiThread(
+	      new Runnable() {
+	        public void run() {
+	          _etSearch.requestFocus();
+	         
+	          
+	        } // end of run() method definition
+	      } // end of anonymous Runnable object instantiation
+	    ); // end of invocation of runOnUiThread
+	    
+	    // send key events so that the user is searching for 'zzz', which should not be found
+	    this.sendKeys(KeyEvent.KEYCODE_Z);
+	    this.sendKeys(KeyEvent.KEYCODE_Z);
+	    this.sendKeys(KeyEvent.KEYCODE_Z);
+	    
+	    // do a search 
+	    _activity.runOnUiThread(
+	  	      new Runnable() {
+	  	        public void run() {
+	  	          _btnSearch.performClick();   
+	  	        } // end of run() method definition
+	  	      } // end of anonymous Runnable object instantiation
+	  	    );
+	    getInstrumentation().waitForIdleSync();
+
+	    // assert view inflation that allows option for adding the item that was not found
+
+
+	}
+	*/
+
+}

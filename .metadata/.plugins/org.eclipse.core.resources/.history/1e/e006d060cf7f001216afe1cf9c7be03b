@@ -1,0 +1,293 @@
+package com.amlm.honeygogroceryshopping.dataaccess;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.util.EnumMap;
+
+import org.json.JSONException;
+
+import android.app.Application;
+import android.content.res.AssetManager;
+import android.os.Environment;
+
+import com.amlm.honeygogroceryshopping.FileNameConstants;
+import com.amlm.honeygogroceryshopping.activities.GroceryFileConsumer;
+import com.amlm.honeygogroceryshopping.interfaces.IGroceryFile;
+import com.dropbox.client2.DropboxAPI;
+import com.dropbox.client2.DropboxAPI.Entry;
+import com.dropbox.client2.android.AndroidAuthSession;
+import com.dropbox.client2.exception.DropboxException;
+import com.google.inject.Inject;
+//import android.os.DropBoxManager.Entry;
+
+public class GroceryFile extends BaseGroceryFile {
+	@Inject Application _app;	
+//	private String _errorMessage;
+	
+
+	
+	public final static String defaultStoreName = "GroceryLists";
+	
+	public GroceryFile() {};
+
+	public static EnumMap<FileNameConstants, IGroceryFile> JsonFiles;
+	
+	    private static File getFile(File parent, String subFolder, String fileName) {
+	        // Get the directory for the app's private pictures directory. 
+	  
+	    	return getFile(new File(parent, subFolder), fileName);
+	        
+	    }   
+	    public static File getFile(IGroceryFile gfile) {
+	        // Get the directory for the app's private pictures directory. 
+	        String sn = gfile.getStoreName();
+	        File parentFolder = GroceryFileConsumer.getGroceryFilesDir();
+	        //context.getExternalFilesDir(null);
+	        if (sn.isEmpty())
+	        {
+	        	return getFile(parentFolder, gfile.getFileName());
+	        }
+	        else
+	        {
+	        	return getFile(parentFolder, sn, gfile.getFileName());
+	        }
+	        
+	    }   
+	    private static File getFile(File dir, String fileName)
+	    {
+	        File retFile = null;
+	        if (!dir.exists())
+	        {
+	        	dir.mkdirs();
+	        }
+	        retFile = new File(dir,fileName /*this.getGroceryListFile()*/ );
+	        
+	        return retFile;	    	
+	    }
+	    /* Checks if external storage is available for read and write */
+	    public static boolean isExternalStorageWritable() {
+	        String state = Environment.getExternalStorageState();
+	        if (Environment.MEDIA_MOUNTED.equals(state)) {
+	            return true;
+	        }
+	        return false;
+	    }
+
+	    /* Checks if external storage is available to at least read */
+	    public static boolean isExternalStorageReadable() {
+	        String state = Environment.getExternalStorageState();
+	        if (Environment.MEDIA_MOUNTED.equals(state) ||
+	            Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+	            return true;
+	        }
+	        return false;
+	    }    
+	    public boolean exists(/*Context context*/)
+	    {
+	    	return getFile(/*context*/).exists();
+	    }
+	      
+		// if the revision of the dropbox file is different than what we have, 
+	    // download the contents of the dropbox file and save it locally
+	    public void syncWithDropbox(/*Context context*/) throws FileNotFoundException, IOException, JSONException
+	    {
+	    	try 
+	    	{
+	    		DropboxFile dbFile = new DropboxFile(this);
+	    		if (dbFile.fileExists())
+	    		{
+	   				if (!dbFile.isRevisionCurrent())
+					{
+	   					dbFile.getLatestRevision(getOutputStream());
+						setDBRevNeedsUpdating(true);
+					}
+	    		}	
+	    	}
+	    	catch (Exception e) 
+	    	{
+				// may just be that file does not yet exist in dropbox
+				setErrorMessage( e.toString());
+	    	}
+	    }
+
+	    
+	    public String read(/*Context context*/) throws IOException, Exception 
+	    {
+	    	
+	        InputStream file = null;
+	        InputStreamReader reader = null;
+       	 	String fileContents = null;
+	        
+       	 	// prior to reading, check if dropbox has a more recent file
+       	 	if (isShared())
+       	 		{
+       	 		syncWithDropbox();
+       	 		}
+       	 		
+       	 	try
+       	 	{
+       	 		// todo: if shared, check revision number and copy file
+       	 		// if updated THEN read the file
+	    	   if (GroceryFile.isExternalStorageReadable() && this.exists(/*context*/))
+       	 	
+	           {
+	    	   	   	file = new FileInputStream(this.getFile(/*context*/));
+	    	   	   	fileContents = inputStreamToContents(file);	
+	           }
+	    	   else
+	    	   {
+	    		   fileContents = createFromAssets();
+	    	   }
+	    	  
+	    	   
+       	 	}
+       	 	finally
+	        {
+	            if (reader != null)
+	            {
+	                reader.close();
+	            }
+	            if (file != null)
+	            {
+	            	file.close();
+	            	
+	            }
+	        }    	
+
+	        return fileContents;
+
+	     
+	    }		 
+	  
+	    
+	  private String inputStreamToContents(InputStream stream) throws IOException
+	  {
+		  String contents = null;
+   	   	InputStreamReader reader;
+   	   	if (stream != null) 
+   	   {
+   		   reader = new InputStreamReader(stream);
+   		   contents = this.readContents(reader);
+   		
+   	   }
+   	   	return contents;
+	  
+	  }
+
+	    
+	    private FileOutputStream getOutputStream(/*Context context*/) throws FileNotFoundException, IOException, JSONException
+
+	    {
+	    	FileOutputStream ret = null;
+	           if (GroceryFile.isExternalStorageWritable())
+	           {
+	        	   ret = new FileOutputStream(this.getFile(/*context*/));
+	           }
+	    	return ret;
+	    }	
+	    
+	    public void save( String contents) throws FileNotFoundException, IOException, JSONException
+		    {
+		        OutputStream file = null;
+		        OutputStreamWriter writer = null;
+		        try
+		        {
+		        	 file =getOutputStream(/*context*/);
+		        	 if (file != null)
+		        	 {
+		        		 writer = new OutputStreamWriter(file);	
+		        		 
+		        		 writer.write(contents);
+		        		 file.flush();
+		        	 }	           
+		        }
+		        finally
+		        {
+		            if (writer != null)
+		            {
+		                writer.close();
+		            }
+		            if (file != null)
+		            {
+		            	file.close();
+		            	
+		            }
+		        }
+		        if (isShared())
+	        	   {
+		        	DropboxFile dbFile = new DropboxFile(this);
+		        	 try {
+						this.setSaveToDbPending(!dbFile.saveToDropboxAppFolder());
+					} catch (DropboxException e) {
+						// TODO Auto-generated catch block
+						throw new IOException(e.getMessage());
+					}
+	        	   }
+		    }
+		 public void delete(/*Context context*/)
+		 {
+	    	if (GroceryFile.isExternalStorageWritable())
+	        {
+	    		if (exists())
+	    		{
+	    			File fileToDelete= this.getFile(/*context*/);
+	    			if (fileToDelete.exists())
+	    			{
+	    				fileToDelete.delete();
+	    			}
+	    		}	
+	    	}    	
+		 }
+		 public File getFile()
+		 {
+			 return GroceryFile.getFile(this.getStoreName(), this.getFileName());
+		 }
+		 private String readContents(InputStreamReader reader) throws IOException
+		    {
+				String str = new String("");
+				String line;
+		        BufferedReader bReader;
+		        bReader = new BufferedReader(reader);
+		        while ((line = bReader.readLine()) != null) {   
+		            str += line;
+		        }
+		        return str;
+			
+		    }
+		public String createFromAssets() throws IOException, JSONException
+		{
+			String contents = new String("");
+			InputStream stream = null;
+			AssetManager manager = _app.getAssets();
+			try {
+				
+				stream= manager.open(this.getFileName());
+				contents = this.inputStreamToContents(stream);
+					
+					this.save(contents);
+			} 
+			catch(Exception e)
+			{ // ignore, as the asset may not exist
+			}
+			
+			finally
+			{
+				if (stream != null)
+				{
+					stream.close();
+				}
+			}
+			return contents;
+		}
+		private void setErrorMessage(String rrorMessage) {
+		//	this._errorMessage = errorMessage;
+		}
+}

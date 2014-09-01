@@ -1,0 +1,65 @@
+package com.amlm.honeygogroceryshopping.adapters;
+
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageButton;
+
+import com.amlm.honeygogroceryshopping.activities.R;
+import com.amlm.honeygogroceryshopping.model.Category;
+
+public class GroceryStoreAdapter extends BaseListAdapter<String> {
+
+	static class GroceryStoreViewHolder {
+    	View _v;
+    	int _viewType;
+    	String _groceryStore;
+    	
+    	GroceryStoreViewHolder(View v, int viewType)
+    	{
+    		_v = v;
+    		_viewType=viewType;
+
+    			editName=(EditText)v.findViewById(R.id.edit_cat_name)	;
+        	    editOrder=(EditText)v.findViewById(R.id.edit_aisle);
+    			deleteButton=(ImageButton)v.findViewById(R.id.delButton);
+    			if (viewType == VIEW_ITEM_READONLY)
+	        	{
+    				editName.setEnabled(false);
+    				deleteButton.setVisibility(View.INVISIBLE);
+    				editOrder.setEnabled(false);
+	        	}	
+    			if (viewType == VIEW_ITEM_SELECTED)
+    			{
+    				editName.requestFocus();
+    			}
+    	}
+        public void bindTo(Category cat)
+        {
+        			_cat=cat;
+        				editName.setText( cat.getName());	    			
+        				editOrder.setText(cat.getOrder().toString());
+        					        		
+        				deleteButton.setTag(cat);
+        }
+        
+    	public boolean saveChangedValues()
+    	{
+    		boolean changesSaved = false;
+    		String name = this.editName.getText().toString();
+    		Integer order= Integer.valueOf(this.editOrder.getText().toString());
+    		if (!this._cat.getName().equals(name))
+    		{
+    			_cat.setName(name);
+    			changesSaved= true;
+    		}
+    		if (!this._cat.getOrder().equals( order))
+    		{
+    			_cat.setOrder(order);
+    			changesSaved = true;
+    		}
+    		return changesSaved;
+    	}
+        
+    }
+    
+}

@@ -1,0 +1,85 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@drawable/layoutbackground" android:orientation="vertical" android:layout_gravity="top">
+    
+    <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/rounded_border"
+	            android:orientation="horizontal" >
+	<Button 
+      android:id="@+id/auth_button" android:text="@string/setup_dropbox_auth" 
+	 android:layout_width="wrap_content" android:layout_height="wrap_content" android:padding="8sp"
+      android:layout_margin="4sp" android:onClick="onLinkOrUnlinkDropbox" android:drawableLeft="@drawable/dropbox"
+		android:background="@color/LightGrey" />
+		            
+    </LinearLayout>
+        <CheckBox android:id="@+id/sharing_on" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="@string/share" android:onClick="onToggleSharing"
+         android:button="@drawable/checkbox_selector" android:layout_margin="4sp" android:textSize="20sp"
+	 android:textColor="@color/Black" />
+    
+
+	  
+	<LinearLayout
+	     android:background="@color/LightGrey"
+	    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+   android:id="@+id/prompt_user_section"
+    android:orientation="vertical" 
+   >
+	         
+  <TextView
+        android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+        
+         android:textSize="20sp"
+	 android:textColor="@color/Black"
+        android:text="@string/label_prompt_for_sharing_direction"/>
+
+	<RadioGroup 
+        android:layout_width="match_parent"
+          android:layout_height="0dp"
+        android:layout_weight="5"  
+        android:orientation="vertical"
+        
+	    android:id="@+id/enable_dropbox_options"
+	   >
+    <RadioButton
+        android:id="@+id/download_dropbox_files"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="@string/use_dropbox_files" 
+        android:textSize="20sp"
+       
+	 android:textColor="@color/Black"   />
+
+    <RadioButton
+        android:id="@+id/upload_dropbox_files"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="@string/share_grocery_files"
+         android:textSize="20sp"
+       
+	 android:textColor="@color/Black" />
+
+    <RadioButton
+        android:id="@+id/unlink_from_dropbox"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="@string/cancel_sharing"
+         android:textSize="20sp"
+         
+	 android:textColor="@color/Black" />
+    </RadioGroup>
+ 		<Button
+ 		    android:id="@+id/btnProceed"
+ 		    android:onClick="onProceed"
+ 		    android:layout_width ="match_parent"
+ 		     android:layout_height="0dp"
+        android:layout_weight="1" 
+ 		     android:textSize="20sp"
+	 android:textColor="@color/Black"
+ 		    android:text="@string/proceed" />        
+	  </LinearLayout>  
+</LinearLayout>

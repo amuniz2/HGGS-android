@@ -1,0 +1,6 @@
+1357450840679	Encapsulate field '_fileName'
+1357495579577	Extract method 'finishDbAuth'
+1357526913454	Extract method 'restoreState'
+1357616291232	Rename type 'Aisle'
+1357693277561	Copy compilation unit
+1357693285284	Delete element

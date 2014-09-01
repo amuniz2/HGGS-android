@@ -1,0 +1,72 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:showDividers="none" 
+    android:background="@drawable/layoutbackground">
+
+
+ 
+ <include layout="@layout/category_header"/>
+
+   <ListView
+       android:id="@+id/categorylist"
+       android:layout_width="match_parent"
+       android:layout_height="0dp"
+       android:layout_weight="1"
+       android:descendantFocusability="beforeDescendants"
+       android:transcriptMode="normal" >
+        
+    </ListView>
+<!--  LinearLayout android:layout_width="fill_parent"
+    	android:layout_height="wrap_content"
+    	android:orientation="horizontal" >
+     	<Button
+         	android:id="@+id/cancelButton"
+         	style="@style/dialogButtonStyle"
+        	android:text="@string/button_cancel"
+        	android:drawableLeft="@drawable/ic_delete"
+        	android:onClick="cancel" />
+     		
+      	<Button
+         	android:id="@+id/saveButton"
+         	style="@style/dialogButtonStyle"
+        	android:text="@string/button_okay"
+        	android:drawableLeft="@drawable/ic_menu_save"
+        	android:onClick="saveList" />
+    </LinearLayout -->	
+<LinearLayout 
+    android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="bottom"
+   >    
+  <ImageButton
+       style="@style/searchAddButtonStyle"
+       android:id="@+id/btnAdd"
+        android:src="@drawable/ic_menu_add"
+        android:contentDescription="@string/button_add"
+         android:layout_weight="1"
+    android:layout_width="0dp"
+        android:onClick="addItemType" />
+          
+     <EditText
+        android:id="@+id/search_text"
+        style="@style/searchTextStyle"   
+    android:layout_width="0dp"
+        android:layout_weight="5"
+        android:hint="@string/enter_search_keywords"
+        />
+     <ImageButton
+             style="@style/searchAddButtonStyle"
+             android:contentDescription="@string/button_search"
+             android:onClick="searchForItem"
+             android:layout_marginRight="2dp"
+             android:id="@+id/search_button"
+             android:layout_width="0dp"
+              android:layout_weight="1"
+             android:src="@drawable/ic_btn_search" />    
+  </LinearLayout>        
+</LinearLayout>
+    

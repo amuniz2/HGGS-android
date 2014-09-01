@@ -1,0 +1,41 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+        android:layout_gravity="center"
+        tools:context=".CreateGroceryStore"
+        android:orientation="vertical"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content">
+	       <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+         style="@android:style/TextAppearance.Medium"
+         android:textStyle="bold"
+         android:text="@string/enter_new_grocery_name" />
+   	<EditText
+   	    style="@style/editTextStyle"
+   	    android:id="@+id/new_grocery_store_name"
+        android:layout_width="wrap_content"
+        android:hint="@string/grocery_store_name"
+   	  /> 
+   	 	    <LinearLayout 
+	        android:layout_width="wrap_content"        
+ android:layout_height="wrap_content"
+	            android:orientation="horizontal"
+	        android:layout_marginTop="8dp" >
+
+
+	     <Button
+	            style="@style/dialogButtonStyle"
+	            android:id="@+id/button_cancel"
+	            android:onClick="cancelEdit"
+	            android:text="@string/button_cancel" 
+	            android:drawableLeft="@drawable/ic_delete"/>
+
+	        <Button
+	           style="@style/dialogButtonStyle"
+	           android:id="@+id/button_save"
+	            android:onClick="applyEdit"
+	            android:text="@string/button_save" 
+	            android:drawableLeft="@drawable/ic_menu_save"/>
+	         </LinearLayout>
+</LinearLayout>

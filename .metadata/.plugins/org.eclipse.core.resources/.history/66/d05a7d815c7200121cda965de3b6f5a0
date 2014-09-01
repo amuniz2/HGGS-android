@@ -1,0 +1,81 @@
+package mocks.serializers;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.UUID;
+//import org.json.JSONException;
+import net.sf.json.JSONArray;
+//import net.sf.json.*;
+import net.sf.json.JSONObject;
+
+
+import com.amlm.honeygogroceryshopping.interfaces.ICategoryListSerializer;
+import com.amlm.honeygogroceryshopping.model.Category;
+import com.amlm.honeygogroceryshopping.model.serialization.JsonTags;
+
+public class MockCategoryListSerializer implements ICategoryListSerializer  {
+    
+	public MockCategoryListSerializer() {}
+	
+	public  ArrayList<Category> parseList(String text) throws org.json.JSONException 
+	{
+		ArrayList<Category> items = new ArrayList<Category>();
+		try
+		{
+			JSONArray jsonCats = JSONArray.fromObject(text);
+
+			//int len = jsonCats.length();
+   	 		Category currentCategory = null;
+   	 		JSONObject jsonCat = null;
+   	 		//for (int i = 0; i < len ; i++)
+   	 		for (Object obj : jsonCats)
+   	 		{
+   	 		
+	   	 		//jsonCat= jsonCats.getJSONObject(i);
+	   	 		jsonCat = (JSONObject) obj;
+	   	 		currentCategory = new Category();
+	   	 		currentCategory.setName(jsonCat.getString(JsonTags.TAG_NAME));
+	   	 		currentCategory.setOrder(jsonCat.getInt(JsonTags.TAG_ORDER));
+	   	 		currentCategory.setId(UUID.fromString(jsonCat.getString(JsonTags.TAG_ID)));
+	   	        items.add(currentCategory);
+	   	 	}
+		}
+		catch (net.sf.json.JSONException ex)
+		{
+			throw new JSONException(ex.getMessage());
+		}
+   	 	return items;
+
+	}
+	public  String writeList(Collection<Category> list) throws JSONException, IOException
+	{
+		JSONArray jsonCatList = new JSONArray();
+		try
+		{
+			JSONObject jsonCatAttributes =null;
+		
+	        String name;
+	        for (Category item: list){
+	        	name = item.getName();
+	        //	if ((name != null) && !name.isEmpty())
+	        	//	{
+	        		jsonCatAttributes = new JSONObject();
+	        		
+	        		jsonCatAttributes.put(JsonTags.TAG_NAME, name);
+	        		jsonCatAttributes.put(JsonTags.TAG_ORDER, String.valueOf(item.getOrder()));
+	        		jsonCatAttributes.put(JsonTags.TAG_ID, item.getId().toString());	            	
+	        		jsonCatList.add(jsonCatAttributes);
+	        	//	}
+	        }
+		}
+		catch (net.sf.json.JSONException ex)
+		{
+			throw new JSONException(ex.getMessage());
+		}
+		return jsonCatList.toString();
+        
+        
+	}
+		
+}

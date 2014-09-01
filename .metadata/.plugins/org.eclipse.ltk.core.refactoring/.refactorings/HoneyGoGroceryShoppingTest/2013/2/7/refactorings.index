@@ -1,0 +1,29 @@
+1360454526179	Delete element
+1360456330592	Rename type 'TestCannotSaveCategoryWithoutAName'
+1360470785234	Copy compilation unit
+1360470841812	Copy compilation unit
+1360517362744	Rename package 'test.common'
+1360518775714	Rename package 'mainActivityTests'
+1360519731681	Rename package 'mocks.groceryfile'
+1360519756032	Rename package 'mocks.serializers'
+1360519780578	Rename package 'modules'
+1360546223641	Copy compilation unit
+1360553634028	Rename method 'addOneItemToEmptyListTest'
+1360597849186	Rename method 'addOneItemToEmptyListTest'
+1360597886392	Rename method 'listShouldBeEmptyInitially'
+1360599810320	Copy compilation unit
+1360600996126	Copy compilation unit
+1360601167103	Rename local variable 'currentCategory'
+1360601200674	Rename local variable 'jsonCats'
+1360612220696	Move compilation unit
+1360612940512	Infer generic type arguments
+1360616625631	Rename method 'testAddOneItemToEmptyListTest'
+1360617559278	Infer generic type arguments
+1360618992921	Extract method 'extracted'
+1360633774184	Copy compilation unit
+1360633801655	Rename type 'TestSaveCategories'
+1360721993274	Copy compilation unit
+1360722605329	Rename type 'MasterListWith50ItemsModule'
+1360728091965	Copy compilation unit
+1360728115559	Rename type 'TestShowCategoriesInAisle'
+1360737105008	Delete element
